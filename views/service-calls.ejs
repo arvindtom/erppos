@@ -1,0 +1,95 @@
+<%- include('partials/head', { pageTitle: 'Service Calls - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Title Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
+        <div>
+          <h1 class="font-headline-lg text-on-surface">Service Calls</h1>
+          <p class="font-body-md text-on-surface-variant">Comprehensive tracking of all customer service calls and equipment maintenance</p>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <a href="/technician-assignment" class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-2 rounded-lg text-label-md hover:opacity-90 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">engineering</span>
+            Technician Assignment Board
+          </a>
+          <button onclick="openQuickServiceCall()" class="flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg text-label-md hover:bg-surface-container-highest transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            New Call
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/20">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container text-on-surface-variant font-label-md uppercase tracking-wider text-label-sm">
+                <th class="py-3 px-space-md">Call ID</th>
+                <th class="py-3 px-space-md">Customer</th>
+                <th class="py-3 px-space-md">Device / Issue</th>
+                <th class="py-3 px-space-md">Contact</th>
+                <th class="py-3 px-space-md">Priority</th>
+                <th class="py-3 px-space-md">Assigned Tech</th>
+                <th class="py-3 px-space-md">Status</th>
+                <th class="py-3 px-space-md text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container text-body-md text-on-surface">
+              <% serviceCalls.forEach(call => { %>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-3 px-space-md font-medium text-secondary"><%= call.id %></td>
+                  <td class="py-3 px-space-md font-medium"><%= call.customer %></td>
+                  <td class="py-3 px-space-md">
+                    <div><%= call.device %></div>
+                    <div class="text-xs text-on-surface-variant"><%= call.issue %></div>
+                  </td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= call.contact %></td>
+                  <td class="py-3 px-space-md">
+                    <span class="px-2 py-0.5 rounded text-xs font-semibold bg-tertiary-fixed text-on-tertiary-fixed">
+                      <%= call.priority %>
+                    </span>
+                  </td>
+                  <td class="py-3 px-space-md">
+                    <% if (call.technicianName) { %>
+                      <span class="font-medium text-on-surface flex items-center gap-1">
+                        <span class="material-symbols-outlined text-xs text-secondary">person</span>
+                        <%= call.technicianName %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-xs text-error font-medium italic">Unassigned</span>
+                    <% } %>
+                  </td>
+                  <td class="py-3 px-space-md">
+                    <span class="px-2 py-0.5 rounded text-xs font-semibold <%= call.status === 'Open' ? 'bg-amber-100 text-amber-800' : 'bg-secondary-fixed text-on-secondary-fixed' %>">
+                      <%= call.status %>
+                    </span>
+                  </td>
+                  <td class="py-3 px-space-md text-right">
+                    <a href="/technician-assignment" class="text-xs text-secondary font-semibold hover:underline">
+                      Assign Board &rarr;
+                    </a>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+</body>
+</html>

@@ -1,0 +1,138 @@
+<%- include('partials/head', { pageTitle: 'Dashboard - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Header Banner -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg bg-surface-container-low p-space-lg rounded-xl shadow-sm border border-outline-variant/20">
+        <div>
+          <h1 class="font-headline-lg text-on-surface">Store Operations & POS Dashboard</h1>
+          <p class="font-body-md text-on-surface-variant">Real-time overview of service calls, technicians, inventory transfers & returns</p>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <a href="/technician-assignment" class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-2 rounded-lg text-label-md hover:opacity-90 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">engineering</span>
+            Assign Technicians
+          </a>
+          <a href="/check-item-price-and-stock" class="flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg text-label-md hover:bg-surface-container-highest transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">inventory_2</span>
+            Check Stock
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick KPI Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-space-lg">
+        <a href="/technician-assignment" class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 hover:border-secondary/40 transition-all flex items-center justify-between group">
+          <div>
+            <div class="text-label-sm text-on-surface-variant uppercase font-semibold">Open Service Calls</div>
+            <div class="font-headline-lg text-on-surface mt-1"><%= openCallsCount %></div>
+            <div class="text-xs text-secondary mt-1 font-medium group-hover:underline">Assign to technicians &rarr;</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+            <span class="material-symbols-outlined text-[24px]">engineering</span>
+          </div>
+        </a>
+
+        <a href="/stock-requests" class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 hover:border-secondary/40 transition-all flex items-center justify-between group">
+          <div>
+            <div class="text-label-sm text-on-surface-variant uppercase font-semibold">Stock Requests</div>
+            <div class="font-headline-lg text-on-surface mt-1"><%= stockRequestsCount %></div>
+            <div class="text-xs text-secondary mt-1 font-medium group-hover:underline">Review hub transfers &rarr;</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+            <span class="material-symbols-outlined text-[24px]">swap_horiz</span>
+          </div>
+        </a>
+
+        <a href="/sales-returns" class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 hover:border-secondary/40 transition-all flex items-center justify-between group">
+          <div>
+            <div class="text-label-sm text-on-surface-variant uppercase font-semibold">Active Sales Returns</div>
+            <div class="font-headline-lg text-on-surface mt-1"><%= returnsCount %></div>
+            <div class="text-xs text-secondary mt-1 font-medium group-hover:underline">Customer return slips &rarr;</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+            <span class="material-symbols-outlined text-[24px]">assignment_return</span>
+          </div>
+        </a>
+
+        <a href="/customers" class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 hover:border-secondary/40 transition-all flex items-center justify-between group">
+          <div>
+            <div class="text-label-sm text-on-surface-variant uppercase font-semibold">Registered Customers</div>
+            <div class="font-headline-lg text-on-surface mt-1">5,428</div>
+            <div class="text-xs text-secondary mt-1 font-medium group-hover:underline">View customer directory &rarr;</div>
+          </div>
+          <div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary-container">
+            <span class="material-symbols-outlined text-[24px]">group</span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Quick Module Shortcuts Grid -->
+      <h2 class="font-headline-md text-on-surface mb-space-md">Application Core Modules</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-lg">
+        
+        <!-- Technician Assignment -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-space-sm mb-space-sm">
+              <span class="w-8 h-8 rounded-lg bg-secondary text-on-secondary flex items-center justify-center font-bold">1</span>
+              <h3 class="font-headline-sm text-on-surface">Technician Assignment</h3>
+            </div>
+            <p class="text-body-sm text-on-surface-variant mb-space-md">
+              Interactive 3-column drag-and-drop board for real-time technician workload balancing and service call tracking.
+            </p>
+          </div>
+          <a href="/technician-assignment" class="w-full text-center py-2 bg-secondary text-on-secondary rounded-lg text-label-md font-medium hover:opacity-90 transition-opacity">
+            Open Board &rarr;
+          </a>
+        </div>
+
+        <!-- Stock Requests -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-space-sm mb-space-sm">
+              <span class="w-8 h-8 rounded-lg bg-primary text-on-primary flex items-center justify-center font-bold">2</span>
+              <h3 class="font-headline-sm text-on-surface">Stock Requests</h3>
+            </div>
+            <p class="text-body-sm text-on-surface-variant mb-space-md">
+              Inter-branch transfers, replenishments and emergency stock orders between retail stores and distribution hubs.
+            </p>
+          </div>
+          <a href="/stock-requests" class="w-full text-center py-2 bg-surface-container text-on-surface rounded-lg text-label-md font-medium hover:bg-surface-container-high transition-colors">
+            Manage Requests &rarr;
+          </a>
+        </div>
+
+        <!-- Check Item Price & Stock -->
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-space-sm mb-space-sm">
+              <span class="w-8 h-8 rounded-lg bg-on-tertiary-container text-on-primary flex items-center justify-center font-bold">3</span>
+              <h3 class="font-headline-sm text-on-surface">Price & Stock Check</h3>
+            </div>
+            <p class="text-body-sm text-on-surface-variant mb-space-md">
+              Query on-hand, reserved, and available stock levels across stores, brands, and categories with Excel export.
+            </p>
+          </div>
+          <a href="/check-item-price-and-stock" class="w-full text-center py-2 bg-surface-container text-on-surface rounded-lg text-label-md font-medium hover:bg-surface-container-high transition-colors">
+            Lookup Stock &rarr;
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+</body>
+</html>

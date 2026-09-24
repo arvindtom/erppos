@@ -1,0 +1,98 @@
+<!-- Global Toast Container -->
+<div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none">
+  <!-- Dynamic toasts injected here -->
+</div>
+
+<!-- Quick Create Modal -->
+<div id="quickCreateModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">add_circle</span>
+        <h3 class="font-headline-sm text-on-surface">Quick Create</h3>
+      </div>
+      <button onclick="closeModal('quickCreateModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="p-space-md grid grid-cols-2 gap-space-sm">
+      <button onclick="openQuickServiceCall()" class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all text-left flex flex-col gap-2 border border-outline-variant/20 hover:border-secondary/40">
+        <span class="material-symbols-outlined text-secondary text-[24px]">engineering</span>
+        <span class="font-semibold text-sm text-on-surface">Service Call</span>
+        <span class="text-xs text-on-surface-variant">Log customer device issue</span>
+      </button>
+
+      <button onclick="openQuickCustomer()" class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all text-left flex flex-col gap-2 border border-outline-variant/20 hover:border-secondary/40">
+        <span class="material-symbols-outlined text-secondary text-[24px]">person_add</span>
+        <span class="font-semibold text-sm text-on-surface">Customer</span>
+        <span class="text-xs text-on-surface-variant">Add contact & GST details</span>
+      </button>
+
+      <button onclick="openQuickStockReq()" class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all text-left flex flex-col gap-2 border border-outline-variant/20 hover:border-secondary/40">
+        <span class="material-symbols-outlined text-secondary text-[24px]">inventory_2</span>
+        <span class="font-semibold text-sm text-on-surface">Stock Request</span>
+        <span class="text-xs text-on-surface-variant">Transfer or Replenish</span>
+      </button>
+
+      <button onclick="openQuickReceipt()" class="p-4 rounded-xl bg-surface-container-low hover:bg-surface-container-high transition-all text-left flex flex-col gap-2 border border-outline-variant/20 hover:border-secondary/40">
+        <span class="material-symbols-outlined text-secondary text-[24px]">payments</span>
+        <span class="font-semibold text-sm text-on-surface">Receipt</span>
+        <span class="text-xs text-on-surface-variant">Collect customer payment</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Quick New Service Call -->
+<div id="quickServiceCallModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <h3 class="font-headline-sm text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">phone_in_talk</span>
+        Create New Service Call
+      </h3>
+      <button onclick="closeModal('quickServiceCallModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form id="quickServiceCallForm" class="p-space-lg space-y-space-md" onsubmit="handleQuickServiceCallSubmit(event)">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer Name *</label>
+          <input required name="customer" placeholder="e.g. Senthil Tech" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Contact Phone</label>
+          <input name="contact" placeholder="e.g. 9876543210" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Device / Equipment *</label>
+          <input required name="device" placeholder="e.g. Samsung Inverter AC 1.5T" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Priority</label>
+          <select name="priority" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none cursor-pointer">
+            <option value="Low">Low</option>
+            <option value="Medium" selected>Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-label-sm text-on-surface-variant block mb-1">Issue Description *</label>
+        <textarea required name="issue" rows="2" placeholder="e.g. PCB display error, no cooling" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs border-t border-surface-container">
+        <button type="button" onclick="closeModal('quickServiceCallModal')" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface text-label-md">Cancel</button>
+        <button type="submit" class="px-space-md py-2 rounded-lg bg-secondary text-on-secondary text-label-md hover:opacity-90">Save Service Call</button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,232 @@
+<%- include('partials/head', { pageTitle: 'Payment Receipts - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Bar / Header -->
+      <div class="flex items-center justify-between mb-space-lg">
+        <div class="flex items-center gap-space-md">
+          <h1 class="font-headline-lg text-on-surface tracking-tight">Payment Receipts</h1>
+          <span class="bg-surface-container-highest text-on-surface-variant text-label-md px-space-sm py-0.5 rounded-full"><%= Math.max(245, receipts.length) %> entries</span>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <button onclick="exportReceiptsCSV()" class="flex items-center gap-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container px-space-md py-1.5 rounded-lg text-label-md transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">export_notes</span>
+            Export
+          </button>
+          <button onclick="location.reload()" class="flex items-center gap-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container px-space-md py-1.5 rounded-lg text-label-md transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">refresh</span>
+            Refresh
+          </button>
+          <button onclick="openNewReceiptModal()" class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-1.5 rounded-lg text-label-md hover:opacity-90 transition-opacity shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            New Receipt
+          </button>
+        </div>
+      </div>
+
+      <!-- Filters and Search Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-space-md mb-space-lg bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/20">
+        <div class="flex items-center flex-1 min-w-[280px] bg-surface-container rounded-lg px-space-md py-2 border border-outline-variant/20">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">search</span>
+          <input 
+            class="bg-transparent border-none outline-none w-full text-body-md text-on-surface placeholder:text-on-surface-variant" 
+            id="searchInput" 
+            placeholder="Search by Doc No, Customer, Mobile..." 
+            type="text"
+          />
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <div class="relative">
+            <select id="receiptStoreFilter" class="appearance-none bg-surface-container text-on-surface text-label-md px-space-md py-2 pr-8 rounded-lg outline-none cursor-pointer border border-outline-variant/20">
+              <option value="all">All Stores</option>
+              <option value="arc1" selected>ARC1 - ARC1</option>
+              <option value="arc2">ARC2 - ARC2</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">expand_more</span>
+          </div>
+          <div class="relative">
+            <select class="appearance-none bg-surface-container text-on-surface text-label-md px-space-md py-2 pr-8 rounded-lg outline-none cursor-pointer border border-outline-variant/20" id="statusFilter">
+              <option value="all">All Status</option>
+              <option value="open">Open</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px] pointer-events-none">filter_list</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden flex flex-col border border-outline-variant/20">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container text-on-surface-variant text-label-sm uppercase tracking-wider border-b border-surface-container">
+                <th class="py-3 px-space-md font-semibold">Doc No.</th>
+                <th class="py-3 px-space-md font-semibold">Date</th>
+                <th class="py-3 px-space-md font-semibold">Customer</th>
+                <th class="py-3 px-space-md font-semibold">Mobile</th>
+                <th class="py-3 px-space-md font-semibold">Store</th>
+                <th class="py-3 px-space-md font-semibold text-right">Amount Paid</th>
+                <th class="py-3 px-space-md font-semibold">Trans Type</th>
+                <th class="py-3 px-space-md font-semibold text-center">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-surface-container" id="receiptsTableBody">
+              <% receipts.forEach(r => { 
+                  const isCancelled = r.status.toLowerCase() === 'cancelled';
+              %>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-3 px-space-md">
+                    <a class="text-secondary font-medium hover:underline" href="javascript:void(0)" onclick="viewReceiptSlip('<%= r.docNo %>')"><%= r.docNo %></a>
+                  </td>
+                  <td class="py-3 px-space-md text-body-md text-on-surface"><%= r.date %></td>
+                  <td class="py-3 px-space-md text-body-md font-medium text-on-surface"><%= r.customer %></td>
+                  <td class="py-3 px-space-md text-body-md text-on-surface-variant"><%= r.mobile %></td>
+                  <td class="py-3 px-space-md text-body-md text-on-surface-variant"><%= r.store %></td>
+                  <td class="py-3 px-space-md text-body-md font-semibold text-on-surface text-right font-mono">₹<%= Number(r.amountPaid).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %></td>
+                  <td class="py-3 px-space-md text-body-md text-on-surface-variant"><%= r.transType %></td>
+                  <td class="py-3 px-space-md text-center">
+                    <% if (isCancelled) { %>
+                      <span class="inline-block bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded font-semibold">CANCELLED</span>
+                    <% } else { %>
+                      <span class="inline-block bg-tertiary-fixed text-on-tertiary-fixed text-label-sm px-2 py-0.5 rounded font-semibold">OPEN</span>
+                    <% } %>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="flex items-center justify-between p-space-md bg-surface-container-lowest border-t border-surface-container">
+          <span class="text-body-sm text-on-surface-variant" id="receiptsCountLabel">Showing 1 to <%= Math.min(10, receipts.length) %> of <%= Math.max(245, receipts.length) %> entries</span>
+          <div class="flex items-center gap-space-sm">
+            <button class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors disabled:opacity-50" disabled>
+              <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+            </button>
+            <span class="text-label-md text-on-surface px-space-xs">1 / 25</span>
+            <button class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface hover:bg-surface-variant transition-colors">
+              <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: New Receipt -->
+<div id="newReceiptModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">payments</span>
+        <h3 class="font-headline-sm text-on-surface">Record Payment Receipt</h3>
+      </div>
+      <button onclick="closeModal('newReceiptModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form id="newReceiptForm" onsubmit="handleNewReceiptSubmit(event)" class="p-space-lg space-y-space-md">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer Name *</label>
+          <input required name="customer" placeholder="e.g. MANIKANDN" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Mobile</label>
+          <input name="mobile" placeholder="e.g. 9876543210" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Amount Paid (₹) *</label>
+          <input required type="number" step="0.01" name="amountPaid" placeholder="12500.00" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary font-mono"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Payment Method</label>
+          <select name="paymentMethod" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none">
+            <option value="Cash">Cash</option>
+            <option value="UPI" selected>UPI / QR Pay</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Bank Transfer">Bank Transfer / NEFT</option>
+            <option value="Cheque">Cheque</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Transaction Type</label>
+          <select name="transType" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none">
+            <option value="Against Transaction">Against Transaction</option>
+            <option value="On Account">On Account</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Store</label>
+          <select name="store" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none">
+            <option value="ARC1">ARC1</option>
+            <option value="ARC2">ARC2</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-label-sm text-on-surface-variant block mb-1">Reference / UTR Number</label>
+        <input name="refNo" placeholder="e.g. UPI-9928172938" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+      </div>
+
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs border-t border-surface-container">
+        <button type="button" onclick="closeModal('newReceiptModal')" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface text-label-md">Cancel</button>
+        <button type="submit" class="px-space-md py-2 rounded-lg bg-secondary text-on-secondary text-label-md hover:opacity-90">Save Receipt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: View Receipt Voucher -->
+<div id="receiptVoucherModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <h3 class="font-headline-sm text-on-surface flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary">receipt</span>
+        Payment Receipt Voucher
+      </h3>
+      <button onclick="closeModal('receiptVoucherModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <div class="p-space-lg space-y-3 text-body-sm" id="voucherContent">
+      <!-- Injected by JS -->
+    </div>
+
+    <div class="p-space-md bg-surface-container-low border-t border-surface-container flex items-center justify-between">
+      <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-surface-container text-on-surface text-xs font-semibold flex items-center gap-1 hover:bg-surface-container-high">
+        <span class="material-symbols-outlined text-[16px]">print</span>
+        Print Voucher
+      </button>
+      <button onclick="closeModal('receiptVoucherModal')" class="px-3 py-1.5 rounded-lg bg-secondary text-on-secondary text-xs font-semibold">
+        Done
+      </button>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+<script src="/js/receipts.js"></script>
+</body>
+</html>

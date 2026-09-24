@@ -1,0 +1,266 @@
+<%- include('partials/head', { pageTitle: 'Customers - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Action & Title Header -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg">
+        <div class="flex items-center gap-space-md">
+          <div class="w-10 h-10 rounded-xl bg-secondary-container flex items-center justify-center text-on-secondary shadow-sm">
+            <span class="material-symbols-outlined text-[24px]">group</span>
+          </div>
+          <div>
+            <h1 class="font-headline-lg text-on-surface">Customers</h1>
+            <p class="font-body-md text-on-surface-variant">Manage your customer relationships and contact details</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-space-sm flex-wrap">
+          <button onclick="refreshCustomers()" class="flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg text-label-md hover:bg-surface-container-highest transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">refresh</span>
+            Refresh
+          </button>
+          <button onclick="exportCustomersCSV()" class="flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg text-label-md hover:bg-surface-container-highest transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">download</span>
+            Export
+          </button>
+          <button onclick="openAddCustomerModal()" class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-2 rounded-lg text-label-md hover:opacity-95 transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            Add Customer
+          </button>
+        </div>
+      </div>
+
+      <!-- Summary Metric Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-md mb-space-lg">
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-center gap-space-md border border-outline-variant/20">
+          <div class="w-12 h-12 rounded-xl bg-primary-fixed flex items-center justify-center text-on-primary-fixed">
+            <span class="material-symbols-outlined text-[24px]">group</span>
+          </div>
+          <div>
+            <div class="font-label-md text-on-surface-variant uppercase tracking-wider">Total Customers</div>
+            <div class="font-headline-lg text-on-surface mt-0.5" id="metricTotalCustomers"><%= Math.max(5428, totalCount) %></div>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-center gap-space-md border border-outline-variant/20">
+          <div class="w-12 h-12 rounded-xl bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed">
+            <span class="material-symbols-outlined text-[24px]">verified_user</span>
+          </div>
+          <div>
+            <div class="font-label-md text-on-surface-variant uppercase tracking-wider">Active</div>
+            <div class="font-headline-lg text-on-surface mt-0.5" id="metricActiveCustomers"><%= Math.max(5402, activeCount) %></div>
+          </div>
+        </div>
+
+        <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex items-center gap-space-md border border-outline-variant/20">
+          <div class="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed">
+            <span class="material-symbols-outlined text-[24px]">mark_email_read</span>
+          </div>
+          <div>
+            <div class="font-label-md text-on-surface-variant uppercase tracking-wider">GST Registered</div>
+            <div class="font-headline-lg text-on-surface mt-0.5" id="metricGstCustomers"><%= Math.max(235, gstCount) %></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filter Bar -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-space-md mb-space-lg">
+        <div class="relative w-full sm:max-w-md">
+          <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-on-surface-variant">
+            <span class="material-symbols-outlined text-[20px]">search</span>
+          </span>
+          <input 
+            id="customerSearchInput"
+            oninput="filterCustomers()"
+            class="w-full bg-surface-container-lowest text-on-surface pl-10 pr-space-md py-2.5 rounded-xl shadow-sm text-body-md outline-none focus:ring-2 focus:ring-secondary/50 placeholder:text-on-surface-variant border border-outline-variant/20" 
+            placeholder="Search by code, name, mobile, or GST..." 
+            type="text"
+          />
+        </div>
+
+        <div class="w-full sm:w-auto flex items-center gap-space-sm">
+          <select 
+            id="customerStatusFilter" 
+            onchange="filterCustomers()"
+            class="w-full sm:w-48 bg-surface-container-lowest text-on-surface px-space-md py-2.5 rounded-xl shadow-sm text-body-md outline-none focus:ring-2 focus:ring-secondary/50 cursor-pointer border border-outline-variant/20"
+          >
+            <option value="All Status">All Status</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Data Table Container -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden mb-space-xl border border-outline-variant/20">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container text-on-surface-variant font-label-md uppercase tracking-wider">
+                <th class="py-3 px-space-md">Customer</th>
+                <th class="py-3 px-space-md">Contact</th>
+                <th class="py-3 px-space-md">GST</th>
+                <th class="py-3 px-space-md">Location</th>
+                <th class="py-3 px-space-md">Status</th>
+                <th class="py-3 px-space-md text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="customersTableBody" class="divide-y divide-surface-container text-body-md text-on-surface">
+              <% customers.forEach(cust => { %>
+                <tr class="hover:bg-surface-container-low transition-colors" id="cust-row-<%= cust.id %>">
+                  <td class="py-3.5 px-space-md">
+                    <div class="flex items-center gap-space-md">
+                      <div class="w-9 h-9 rounded-full <%= cust.avatarBg || 'bg-secondary' %> flex items-center justify-center text-on-secondary font-headline-sm flex-shrink-0">
+                        <%= cust.initial || cust.name.slice(0, 1).toUpperCase() %>
+                      </div>
+                      <div>
+                        <a class="font-headline-sm text-secondary hover:underline" href="javascript:void(0)" onclick="openEditCustomerModal('<%= cust.id %>')"><%= cust.code %></a>
+                        <div class="text-body-sm text-on-surface-variant uppercase"><%= cust.name %></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="py-3.5 px-space-md">
+                    <div class="flex items-center gap-space-xs text-on-surface-variant">
+                      <span class="material-symbols-outlined text-[16px]">call</span>
+                      <span><%= cust.phone %></span>
+                    </div>
+                    <% if (cust.email && cust.email !== '—') { %>
+                      <div class="flex items-center gap-space-xs text-on-surface-variant mt-0.5">
+                        <span class="material-symbols-outlined text-[16px]">mail</span>
+                        <span><%= cust.email %></span>
+                      </div>
+                    <% } %>
+                  </td>
+                  <td class="py-3.5 px-space-md">
+                    <% if (cust.gst && cust.gst !== '—') { %>
+                      <span class="inline-flex items-center px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed font-label-sm">
+                        <%= cust.gst %>
+                      </span>
+                    <% } else { %>
+                      <span class="text-on-surface-variant">—</span>
+                    <% } %>
+                  </td>
+                  <td class="py-3.5 px-space-md text-on-surface-variant font-body-sm">
+                    <%= cust.city %>, <%= cust.state %>
+                  </td>
+                  <td class="py-3.5 px-space-md">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">
+                      <span class="w-1.5 h-1.5 rounded-full <%= cust.status === 'Active' ? 'bg-secondary' : 'bg-outline' %>"></span>
+                      <%= cust.status %>
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-space-md text-right">
+                    <div class="flex items-center justify-end gap-space-xs">
+                      <button onclick="openEditCustomerModal('<%= cust.id %>')" class="w-8 h-8 rounded hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors" title="Edit">
+                        <span class="material-symbols-outlined text-[18px]">edit</span>
+                      </button>
+                      <button onclick="confirmDeleteCustomer('<%= cust.id %>', '<%= cust.name %>')" class="w-8 h-8 rounded hover:bg-error-container/40 flex items-center justify-center text-error transition-colors" title="Delete">
+                        <span class="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Footer -->
+        <div class="flex items-center justify-between px-space-lg py-space-md bg-surface-container-lowest border-t border-surface-container">
+          <div class="text-body-sm text-on-surface-variant">
+            Showing <span class="font-headline-sm text-on-surface">1</span> to <span class="font-headline-sm text-on-surface"><%= customers.length %></span> of <span class="font-headline-sm text-on-surface">5,428</span> entries
+          </div>
+          <div class="flex items-center gap-space-xs">
+            <button class="px-space-md py-1.5 rounded bg-surface-container text-on-surface-variant text-label-md hover:bg-surface-container-high transition-colors disabled:opacity-50" disabled>Previous</button>
+            <button class="px-3 py-1.5 rounded bg-secondary text-on-secondary text-label-md font-semibold">1</button>
+            <button class="px-3 py-1.5 rounded bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors">2</button>
+            <button class="px-3 py-1.5 rounded bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors">3</button>
+            <button class="px-space-md py-1.5 rounded bg-surface-container text-on-surface text-label-md hover:bg-surface-container-high transition-colors">Next</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Add / Edit Customer -->
+<div id="customerFormModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-secondary" id="modalCustomerIcon">person_add</span>
+        <h3 class="font-headline-sm text-on-surface" id="modalCustomerTitle">Add Customer</h3>
+      </div>
+      <button onclick="closeModal('customerFormModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form id="customerForm" onsubmit="handleCustomerFormSubmit(event)" class="p-space-lg space-y-space-md">
+      <input type="hidden" id="custFormId" name="id"/>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer Code</label>
+          <input id="custFormCode" name="code" placeholder="Auto-generated if empty" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer Name *</label>
+          <input required id="custFormName" name="name" placeholder="e.g. SATHYA AGENCIES" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Phone Number *</label>
+          <input required id="custFormPhone" name="phone" placeholder="e.g. 9876543210" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Email</label>
+          <input id="custFormEmail" name="email" type="email" placeholder="customer@example.com" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">GST Number</label>
+          <input id="custFormGst" name="gst" placeholder="e.g. 33AABCB1002G1ZN" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary uppercase"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">City</label>
+          <input id="custFormCity" name="city" placeholder="TIRUPUR" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">State</label>
+          <input id="custFormState" name="state" placeholder="TN" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none focus:border-secondary uppercase"/>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-label-sm text-on-surface-variant block mb-1">Status</label>
+        <select id="custFormStatus" name="status" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-space-sm pt-space-xs border-t border-surface-container">
+        <button type="button" onclick="closeModal('customerFormModal')" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface text-label-md">Cancel</button>
+        <button type="submit" class="px-space-md py-2 rounded-lg bg-secondary text-on-secondary text-label-md hover:opacity-90">Save Customer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+<script src="/js/customers.js"></script>
+</body>
+</html>

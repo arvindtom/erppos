@@ -1,0 +1,249 @@
+<%- include('partials/head', { pageTitle: 'Technician Assignment - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Title & Action Bar -->
+      <div class="flex items-center justify-between mb-space-lg bg-surface-container-low p-space-md rounded-xl shadow-sm border border-outline-variant/20">
+        <div class="flex items-center gap-space-md">
+          <div class="w-12 h-12 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shadow-inner">
+            <span class="material-symbols-outlined text-[24px]" style="font-variation-settings: 'FILL' 1;">group</span>
+          </div>
+          <div>
+            <h1 class="font-headline-lg text-on-surface">Technician Assignment</h1>
+            <p class="font-body-md text-on-surface-variant">Drag open calls onto a technician to assign</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-space-sm">
+          <button onclick="openQuickServiceCall()" class="flex items-center gap-space-xs bg-secondary text-on-secondary hover:opacity-90 px-space-md py-2 rounded-lg font-label-md transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            New Call
+          </button>
+          <button onclick="reloadBoard()" class="flex items-center gap-space-xs bg-surface-container-highest hover:bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg font-label-md transition-colors shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">refresh</span>
+            Refresh Board
+          </button>
+        </div>
+      </div>
+
+      <!-- 3-Column Kanban Board -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-space-lg">
+
+        <!-- Column 1: Open Calls -->
+        <div class="flex flex-col gap-space-md">
+          <div class="flex items-center justify-between px-space-xs">
+            <h2 class="font-headline-md text-on-surface flex items-center gap-space-xs">
+              Open Calls 
+              <span id="openCallsCountBadge" class="bg-surface-container-highest text-on-surface-variant px-space-xs py-0.5 rounded-full text-label-sm font-label-md">
+                <%= openCalls.length %>
+              </span>
+            </h2>
+            <span class="text-label-sm text-on-surface-variant">Drag to assign</span>
+          </div>
+
+          <div id="openCallsList" class="flex flex-col gap-space-sm min-h-[500px] p-space-sm bg-surface-container-low rounded-xl border border-dashed border-outline-variant/40">
+            <% if (openCalls.length === 0) { %>
+              <div id="noOpenCallsPlaceholder" class="flex flex-col items-center justify-center h-48 text-on-surface-variant text-center p-4">
+                <span class="material-symbols-outlined text-4xl mb-2 opacity-50">task_alt</span>
+                <p class="text-sm font-medium">No Open Calls</p>
+                <p class="text-xs opacity-75 mt-1">All service calls have been assigned!</p>
+              </div>
+            <% } %>
+
+            <% openCalls.forEach(call => { %>
+              <div 
+                id="call-<%= call.id %>"
+                class="call-draggable-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing border border-outline-variant/30 flex flex-col gap-space-sm relative group select-none" 
+                draggable="true"
+                data-id="<%= call.id %>"
+                data-customer="<%= call.customer %>"
+              >
+                <div class="absolute top-3 right-3 flex items-center gap-1.5">
+                  <span class="bg-tertiary-fixed text-on-tertiary-fixed px-2 py-0.5 rounded text-label-sm font-label-md">
+                    <%= call.priority %>
+                  </span>
+                </div>
+                <div class="pr-16">
+                  <span class="font-headline-sm text-secondary"><%= call.id %></span>
+                  <h3 class="font-body-lg font-medium text-on-surface mt-0.5"><%= call.customer %></h3>
+                </div>
+                <div class="text-body-sm text-on-surface-variant flex items-center gap-space-xs pt-1 border-t border-surface-container">
+                  <span class="material-symbols-outlined text-[14px]">devices</span>
+                  <span class="font-medium"><%= call.device %></span>
+                  <span class="text-outline">•</span>
+                  <span class="truncate"><%= call.issue %></span>
+                </div>
+                <!-- Quick assign trigger on hover / mobile -->
+                <div class="hidden group-hover:flex items-center justify-between pt-1 text-xs text-secondary font-medium">
+                  <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[13px]">drag_indicator</span> Drag card to technician
+                  </span>
+                  <button onclick="openAssignModal('<%= call.id %>')" class="px-2 py-0.5 bg-secondary-fixed text-on-secondary-fixed rounded hover:bg-secondary hover:text-on-secondary transition-all">
+                    Assign...
+                  </button>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Column 2: Technicians (Drop Zones) -->
+        <div class="flex flex-col gap-space-md">
+          <div class="flex items-center justify-between px-space-xs">
+            <h2 class="font-headline-md text-on-surface flex items-center gap-space-xs">
+              Technicians 
+              <span class="bg-surface-container-highest text-on-surface-variant px-space-xs py-0.5 rounded-full text-label-sm font-label-md">
+                <%= technicians.length %>
+              </span>
+            </h2>
+            <span class="text-label-sm text-on-surface-variant">Drop zones</span>
+          </div>
+
+          <div class="flex flex-col gap-space-sm" id="techniciansList">
+            <% technicians.forEach(tech => { 
+                const isAvailable = tech.status === 'Available';
+            %>
+              <div 
+                id="tech-dropzone-<%= tech.id %>"
+                class="tech-dropzone-card bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 hover:border-secondary/50 transition-all flex flex-col gap-space-sm relative"
+                data-tech-id="<%= tech.id %>"
+                data-tech-name="<%= tech.name %>"
+              >
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center gap-space-sm">
+                    <div class="w-10 h-10 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-headline-sm font-semibold">
+                      <%= tech.initial %>
+                    </div>
+                    <div>
+                      <h3 class="font-headline-sm text-on-surface"><%= tech.name %></h3>
+                      <p class="text-body-sm text-on-surface-variant"><%= tech.specialty %> • <%= tech.phone %></p>
+                    </div>
+                  </div>
+                  <span class="<%= isAvailable ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %> px-2 py-0.5 rounded text-label-sm font-label-md">
+                    <%= tech.status %>
+                  </span>
+                </div>
+
+                <div class="flex items-center justify-between text-body-sm text-on-surface-variant pt-2 border-t border-surface-container">
+                  <span>Today Assigned: <strong class="text-on-surface font-medium tech-assigned-count" id="count-assigned-<%= tech.id %>"><%= tech.assignedToday %></strong></span>
+                  <span>Closed: <strong class="text-on-surface font-medium tech-closed-count" id="count-closed-<%= tech.id %>"><%= tech.closedToday %></strong></span>
+                </div>
+
+                <!-- Drop indicator hint -->
+                <div class="drop-hint hidden text-xs font-semibold text-secondary text-center py-1 bg-secondary-fixed/30 rounded border border-dashed border-secondary">
+                  Drop here to assign to <%= tech.name %>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+        <!-- Column 3: Assigned Calls -->
+        <div class="flex flex-col gap-space-md">
+          <div class="flex items-center justify-between px-space-xs">
+            <h2 class="font-headline-md text-on-surface flex items-center gap-space-xs">
+              Assigned Calls 
+              <span id="assignedCallsCountBadge" class="bg-surface-container-highest text-on-surface-variant px-space-xs py-0.5 rounded-full text-label-sm font-label-md">
+                <%= assignedCalls.length %>
+              </span>
+            </h2>
+            <span class="text-label-sm text-on-surface-variant">Active tracking</span>
+          </div>
+
+          <div id="assignedCallsList" class="flex flex-col gap-space-sm">
+            <% assignedCalls.forEach(call => { 
+                const isInProgress = call.status === 'In Progress';
+                const isClosed = call.status === 'Closed';
+                let badgeClass = 'bg-secondary-fixed text-on-secondary-fixed';
+                if (isInProgress) badgeClass = 'bg-tertiary-fixed text-on-tertiary-fixed';
+                if (isClosed) badgeClass = 'bg-emerald-100 text-emerald-800';
+            %>
+              <div 
+                id="assigned-<%= call.id %>"
+                class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-sm relative group hover:shadow-md transition-all"
+                data-id="<%= call.id %>"
+              >
+                <div class="absolute top-3 right-3 flex items-center gap-1.5">
+                  <span class="<%= badgeClass %> px-2 py-0.5 rounded text-label-sm font-label-md">
+                    <%= call.status %>
+                  </span>
+                </div>
+                <div class="pr-24">
+                  <span class="font-headline-sm text-secondary"><%= call.id %></span>
+                  <h3 class="font-body-lg font-medium text-on-surface mt-0.5"><%= call.customer %></h3>
+                  <p class="text-xs text-on-surface-variant"><%= call.device %></p>
+                </div>
+                <div class="text-body-sm text-on-surface-variant flex items-center justify-between pt-1 border-t border-surface-container">
+                  <div class="flex items-center gap-space-xs">
+                    <span class="material-symbols-outlined text-[14px] text-secondary">arrow_forward</span>
+                    <span class="font-medium text-on-surface"><%= call.technicianName %></span>
+                  </div>
+                  <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <% if (call.status === 'Assigned') { %>
+                      <button onclick="updateCallStatus('<%= call.id %>', 'In Progress')" class="text-xs px-2 py-0.5 rounded bg-tertiary-fixed text-on-tertiary-fixed hover:opacity-90" title="Start Job">
+                        Start
+                      </button>
+                    <% } else if (call.status === 'In Progress') { %>
+                      <button onclick="updateCallStatus('<%= call.id %>', 'Closed')" class="text-xs px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 hover:opacity-90" title="Mark Closed">
+                        Complete
+                      </button>
+                    <% } %>
+                    <button onclick="unassignCall('<%= call.id %>')" class="text-xs px-1.5 py-0.5 rounded text-error hover:bg-error-container" title="Unassign call back to Open">
+                      <span class="material-symbols-outlined text-[14px]">undo</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            <% }); %>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Assign Call Directly (Fallback / click) -->
+<div id="assignModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-sm p-space-md border border-outline-variant/30">
+    <div class="flex items-center justify-between mb-3 pb-2 border-b border-surface-container">
+      <h3 class="font-headline-sm text-on-surface">Assign Service Call</h3>
+      <button onclick="closeModal('assignModal')" class="p-1 text-on-surface-variant hover:bg-surface-container rounded-lg">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+    <input type="hidden" id="modalCallId"/>
+    <p class="text-body-sm text-on-surface-variant mb-3">Select technician to assign call <span id="modalCallDisplay" class="font-semibold text-secondary"></span>:</p>
+    <div class="flex flex-col gap-2">
+      <% technicians.forEach(tech => { %>
+        <button 
+          onclick="performAssign(document.getElementById('modalCallId').value, '<%= tech.id %>')"
+          class="flex items-center justify-between p-2.5 rounded-lg border border-surface-container hover:bg-surface-container-low transition-colors text-left"
+        >
+          <div class="flex items-center gap-2">
+            <span class="w-8 h-8 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-bold text-xs"><%= tech.initial %></span>
+            <div>
+              <p class="text-sm font-medium text-on-surface"><%= tech.name %></p>
+              <p class="text-xs text-on-surface-variant"><%= tech.specialty %></p>
+            </div>
+          </div>
+          <span class="text-xs text-secondary font-medium">Assign &rarr;</span>
+        </button>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+<script src="/js/technician.js"></script>
+</body>
+</html>

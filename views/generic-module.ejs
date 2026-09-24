@@ -1,0 +1,56 @@
+<%- include('partials/head', { pageTitle: (typeof moduleTitle !== 'undefined' ? moduleTitle : 'Module') + ' - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Breadcrumb & Title Bar -->
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-space-lg bg-surface-container-low p-space-lg rounded-xl shadow-sm border border-outline-variant/20">
+        <div>
+          <div class="text-xs text-on-surface-variant mb-1 flex items-center gap-1">
+            <a href="/dashboard" class="hover:underline">Home</a>
+            <span>/</span>
+            <span><%= typeof moduleTitle !== 'undefined' ? moduleTitle : 'Module' %></span>
+          </div>
+          <h1 class="font-headline-lg text-on-surface"><%= typeof moduleTitle !== 'undefined' ? moduleTitle : 'Module' %></h1>
+          <p class="font-body-md text-on-surface-variant">Enterprise Resource Planning &amp; Point of Sale Sub-module</p>
+        </div>
+        <div class="flex items-center gap-space-sm">
+          <button onclick="showToast('Module synced with central database', 'info')" class="flex items-center gap-space-xs bg-surface-container-high text-on-surface px-space-md py-2 rounded-lg text-label-md hover:bg-surface-container-highest transition-all shadow-sm">
+            <span class="material-symbols-outlined text-[18px]">sync</span>
+            Sync
+          </button>
+          <a href="/technician-assignment" class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-2 rounded-lg text-label-md hover:opacity-90 shadow-sm transition-all">
+            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+            Back to Active Board
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Nav Banner -->
+      <div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/20 mb-space-lg">
+        <h3 class="font-headline-sm text-on-surface mb-2">Available Integrated Modules:</h3>
+        <p class="text-body-sm text-on-surface-variant mb-4">Click any of the primary implemented workspaces below:</p>
+        <div class="flex flex-wrap gap-2">
+          <a href="/technician-assignment" class="px-3 py-1.5 rounded-lg bg-secondary-fixed text-on-secondary-fixed text-xs font-semibold hover:opacity-80">Technician Assignment Board</a>
+          <a href="/stock-requests" class="px-3 py-1.5 rounded-lg bg-primary-fixed text-on-primary-fixed text-xs font-semibold hover:opacity-80">Stock Requests</a>
+          <a href="/sales-returns" class="px-3 py-1.5 rounded-lg bg-tertiary-fixed text-on-tertiary-fixed text-xs font-semibold hover:opacity-80">Sales Returns</a>
+          <a href="/check-item-price-and-stock" class="px-3 py-1.5 rounded-lg bg-surface-container-high text-on-surface text-xs font-semibold hover:opacity-80">Check Item Price & Stock</a>
+          <a href="/customers" class="px-3 py-1.5 rounded-lg bg-secondary-container text-on-secondary-container text-xs font-semibold hover:opacity-80">Customers</a>
+          <a href="/payment-receipts" class="px-3 py-1.5 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-semibold hover:opacity-80">Payment Receipts</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+</body>
+</html>
