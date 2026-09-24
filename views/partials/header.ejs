@@ -1,75 +1,205 @@
-<header class="fixed top-0 left-64 right-0 h-16 bg-surface/80 backdrop-blur-xl z-40 flex items-center justify-between px-space-lg border-b border-surface-container">
-  <!-- Search Module Input -->
-  <div class="relative flex items-center flex-1 max-w-md">
-    <div class="flex items-center w-full bg-surface-container rounded-lg px-space-md py-1.5 focus-within:ring-2 focus-within:ring-secondary/40 transition-all">
-      <span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">search</span>
-      <input 
-        id="globalSearchInput" 
-        class="bg-transparent border-none outline-none w-full text-body-md text-on-surface placeholder:text-on-surface-variant" 
-        placeholder="Search modules, orders, customers..." 
-        type="text"
-        autocomplete="off"
-      />
+<!-- Top Enterprise System Header Bar -->
+<header class="fixed top-0 left-64 right-0 z-40 bg-white border-b border-slate-200 shadow-xs">
+  <div class="h-14 px-4 flex items-center justify-between gap-4">
+    <!-- Left: Company & Store Info -->
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded bg-sky-600 flex items-center justify-center text-white shadow-xs">
+        <span class="material-symbols-outlined text-[19px]">domain</span>
+      </div>
+      <div class="flex flex-col">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-800 tracking-tight">BUSON DIGITAL SERVICES INDIA PRIVATE LIMITED</span>
+          <span class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">• ARCH GATE - STOREs</span>
+        </div>
+        <div class="flex items-center gap-3 text-[11px] text-slate-500 font-medium">
+          <span class="inline-flex items-center gap-1 bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono font-semibold">
+            <span class="material-symbols-outlined text-[13px]">storefront</span> ARC1
+          </span>
+          <span id="liveHeaderClock" class="inline-flex items-center gap-1 font-mono">
+            <span class="material-symbols-outlined text-[13px]">schedule</span> 08:23 PM
+          </span>
+        </div>
+      </div>
     </div>
 
-    <!-- Live Search Dropdown -->
-    <div id="globalSearchResults" class="hidden absolute top-12 left-0 right-0 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto divide-y divide-surface-container">
-      <!-- Injected by JS -->
+    <!-- Center: Quick Search -->
+    <div class="relative flex-1 max-w-sm hidden md:block">
+      <div class="flex items-center w-full bg-slate-100/80 hover:bg-slate-100 focus-within:bg-white rounded-lg px-3 py-1.5 border border-slate-200/80 focus-within:border-sky-500 transition-all">
+        <span class="material-symbols-outlined text-slate-400 text-[17px] mr-2">search</span>
+        <input 
+          id="globalSearchInput" 
+          class="bg-transparent border-none outline-none w-full text-xs text-slate-800 placeholder:text-slate-400" 
+          placeholder="Search modules, invoices, serials, customers..." 
+          type="text"
+          autocomplete="off"
+        />
+      </div>
+
+      <!-- Live Search Results Dropdown -->
+      <div id="globalSearchResults" class="hidden absolute top-10 left-0 right-0 bg-white border border-slate-200 rounded-xl shadow-xl z-50 max-h-80 overflow-y-auto divide-y divide-slate-100"></div>
     </div>
-  </div>
 
-  <!-- Header Right Actions -->
-  <div class="flex items-center gap-space-md">
-    <button 
-      id="quickCreateBtn"
-      class="flex items-center gap-space-xs bg-secondary text-on-secondary px-space-md py-1.5 rounded-lg text-label-md hover:opacity-90 active:scale-95 transition-all shadow-sm"
-    >
-      <span class="material-symbols-outlined text-[16px]">add</span>
-      Quick Create
-    </button>
+    <!-- Right: Actions & User Info -->
+    <div class="flex items-center gap-2">
+      <!-- Quick POS Button -->
+      <a href="/pos" class="hidden sm:flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-xs transition-all">
+        <span class="material-symbols-outlined text-[15px]">point_of_sale</span>
+        POS Register
+      </a>
 
-    <!-- Notifications Button -->
-    <div class="relative">
-      <button 
-        id="notificationBtn"
-        class="w-9 h-9 rounded-lg hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors relative"
-        title="Notifications"
-      >
-        <span class="material-symbols-outlined text-[20px]">notifications</span>
-        <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span>
+      <!-- Refresh Page Button -->
+      <button onclick="window.location.reload()" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors" title="Refresh">
+        <span class="material-symbols-outlined text-[18px]">sync</span>
       </button>
 
-      <div id="notificationMenu" class="hidden absolute right-0 top-11 w-80 bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-xl p-3 z-50">
-        <div class="flex items-center justify-between pb-2 border-b border-surface-container">
-          <span class="text-label-md font-semibold text-on-surface">Notifications</span>
-          <span class="text-xs text-secondary font-medium">3 unread</span>
-        </div>
-        <div class="py-2 space-y-2 text-xs">
-          <div class="p-2 rounded bg-surface-container-low">
-            <p class="font-medium text-on-surface">New stock request REQ-2026-0891</p>
-            <p class="text-on-surface-variant text-[11px]">North Hub → East Central</p>
-          </div>
-          <div class="p-2 rounded hover:bg-surface-container-low transition-colors">
-            <p class="font-medium text-on-surface">Service Call SC-00003 unassigned</p>
-            <p class="text-on-surface-variant text-[11px]">Bharat Electronics • Sony Soundbar</p>
-          </div>
-          <div class="p-2 rounded hover:bg-surface-container-low transition-colors">
-            <p class="font-medium text-on-surface">Payment receipt #240260 created</p>
-            <p class="text-on-surface-variant text-[11px]">Amount ₹12,500 by asdda</p>
-          </div>
-        </div>
-      </div>
-    </div>
+      <!-- Notifications -->
+      <div class="relative">
+        <button id="notificationBtn" class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors relative" title="Notifications">
+          <span class="material-symbols-outlined text-[19px]">notifications</span>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white"></span>
+        </button>
 
-    <!-- User Profile Dropdown -->
-    <div class="flex items-center gap-2 pl-2 border-l border-surface-container">
-      <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer shadow-sm" title="Logged in as Admin">
-        <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
+        <div id="notificationMenu" class="hidden absolute right-0 top-10 w-80 bg-white border border-slate-200 rounded-xl shadow-xl p-3 z-50">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span class="text-xs font-bold text-slate-800">Notifications</span>
+            <span class="text-[11px] text-sky-600 font-semibold">3 unread</span>
+          </div>
+          <div class="py-2 space-y-2 text-xs">
+            <div class="p-2 rounded bg-slate-50 border border-slate-100">
+              <p class="font-medium text-slate-800">Service Call SC-000003 unassigned</p>
+              <p class="text-slate-500 text-[11px]">Bharat Electronics • Sony Soundbar</p>
+            </div>
+            <div class="p-2 rounded hover:bg-slate-50 transition-colors">
+              <p class="font-medium text-slate-800">Sales Order #241817 pending invoice</p>
+              <p class="text-slate-500 text-[11px]">final fantasy • ₹12,500.00</p>
+            </div>
+            <div class="p-2 rounded hover:bg-slate-50 transition-colors">
+              <p class="font-medium text-slate-800">Inward transfer #26000012 arrived</p>
+              <p class="text-slate-500 text-[11px]">Status: IN-TRANSIT from ARC1</p>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="hidden sm:flex flex-col">
-        <span class="text-xs font-semibold text-on-surface leading-tight">Admin User</span>
-        <span class="text-[10px] text-on-surface-variant leading-tight">Store Manager</span>
+
+      <!-- User Profile Badge matching screenshot -->
+      <div class="flex items-center gap-2 pl-2 border-l border-slate-200">
+        <div class="w-7 h-7 rounded-full bg-sky-600 text-white font-bold text-xs flex items-center justify-center shadow-xs">
+          A
+        </div>
+        <div class="flex flex-col text-left">
+          <span class="text-xs font-bold text-slate-800 leading-tight">Administrator1562</span>
+          <span class="text-[10px] text-slate-500 font-medium leading-tight">Admin</span>
+        </div>
       </div>
     </div>
   </div>
+
+  <!-- Horizontal Quick Navigation Module Tabs Bar (matches screenshot tabs) -->
+  <div class="h-10 px-4 bg-slate-50 border-t border-slate-200 flex items-center gap-1 overflow-x-auto text-xs font-medium select-none no-scrollbar">
+    <%
+      const navTabs = [
+        { path: 'dashboard', label: 'Dashboard', icon: 'grid_view' },
+        { path: 'activities', label: 'Enquiry', icon: 'contact_support' },
+        { path: 'leads', label: 'Leads', icon: 'groups' },
+        { path: 'service-dashboard', label: 'Service Dashboard', icon: 'space_dashboard' },
+        { path: 'service-calls', label: 'Service Calls', icon: 'build' },
+        { path: 'customer-equipment-cards', label: 'Customer Equipment', icon: 'inventory' },
+        { path: 'service-contracts', label: 'Service Contracts', icon: 'article' },
+        { path: 'technician-assignment', label: 'Technician Assignment', icon: 'engineering' },
+        { path: 'stock-inward', label: 'Stock Inward', icon: 'input' },
+        { path: 'stock-outward', label: 'Stock Outward', icon: 'output' },
+        { path: 'sales-orders', label: 'Sales Orders', icon: 'shopping_bag' },
+        { path: 'sales-invoices', label: 'Sales Invoices', icon: 'receipt_long' },
+        { path: 'sales-invoice-reprint', label: 'Invoice Reprint', icon: 'print' },
+        { path: 'finance-receipts', label: 'Finance Receipts', icon: 'account_balance' }
+      ];
+    %>
+
+    <% navTabs.forEach(tab => { 
+        const isTabActive = currentPath === tab.path || (tab.path === 'activities' && currentPath === 'enquiry');
+    %>
+      <a 
+        href="/<%= tab.path %>" 
+        class="flex items-center gap-1.5 px-3 py-1.5 rounded-t-md transition-all whitespace-nowrap <%= isTabActive ? 'bg-[#0284c7] text-white font-semibold shadow-xs' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60' %>"
+      >
+        <span class="material-symbols-outlined text-[15px]"><%= tab.icon %></span>
+        <span><%= tab.label %></span>
+      </a>
+    <% }); %>
+  </div>
 </header>
+
+<script>
+  // Dynamic Live Clock
+  function updateHeaderClock() {
+    const el = document.getElementById('liveHeaderClock');
+    if (!el) return;
+    const now = new Date();
+    let hours = now.getHours();
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strHours = String(hours).padStart(2, '0');
+    el.innerHTML = `<span class="material-symbols-outlined text-[13px]">schedule</span> ${strHours}:${minutes} ${ampm}`;
+  }
+  setInterval(updateHeaderClock, 30000);
+  updateHeaderClock();
+
+  // Notification toggle
+  const notifBtn = document.getElementById('notificationBtn');
+  const notifMenu = document.getElementById('notificationMenu');
+  if (notifBtn && notifMenu) {
+    notifBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifMenu.classList.toggle('hidden');
+    });
+    document.addEventListener('click', () => {
+      notifMenu.classList.add('hidden');
+    });
+  }
+
+  // Global search input handling
+  const gSearch = document.getElementById('globalSearchInput');
+  const gResults = document.getElementById('globalSearchResults');
+  if (gSearch && gResults) {
+    let debounceTimer;
+    gSearch.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      const q = e.target.value.trim();
+      if (q.length < 2) {
+        gResults.classList.add('hidden');
+        return;
+      }
+      debounceTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`);
+          const data = await res.json();
+          if (data && data.results && data.results.length > 0) {
+            gResults.innerHTML = data.results.map(r => `
+              <a href="${r.url}" class="flex items-center justify-between p-2.5 hover:bg-slate-50 transition-colors">
+                <div>
+                  <p class="text-xs font-semibold text-slate-800">${r.title}</p>
+                  <p class="text-[11px] text-slate-500">${r.subtitle}</p>
+                </div>
+                <span class="text-[10px] uppercase font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">${r.type}</span>
+              </a>
+            `).join('');
+            gResults.classList.remove('hidden');
+          } else {
+            gResults.innerHTML = `<div class="p-3 text-xs text-slate-400 text-center">No matching records found</div>`;
+            gResults.classList.remove('hidden');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 250);
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!gSearch.contains(e.target) && !gResults.contains(e.target)) {
+        gResults.classList.add('hidden');
+      }
+    });
+  }
+</script>

@@ -150,16 +150,82 @@ app.get('/service-calls', (req, res) => {
   });
 });
 
+app.get('/sales-invoices', (req, res) => {
+  const salesInvoices = store.getSalesInvoices();
+  res.render('sales-invoices', {
+    ...getCommonData('sales-invoices', 'Sales Invoices'),
+    salesInvoices
+  });
+});
+
+app.get('/sales-invoice-reprint', (req, res) => {
+  const invoices = store.getSalesInvoiceReprint();
+  res.render('sales-invoice-reprint', {
+    ...getCommonData('sales-invoice-reprint', 'Sales Invoice Reprinting'),
+    invoices
+  });
+});
+
+app.get('/service-dashboard', (req, res) => {
+  const db = store.getDb();
+  res.render('service-dashboard', {
+    ...getCommonData('service-dashboard', 'Service Dashboard'),
+    serviceCalls: db.serviceCalls,
+    technicians: db.technicians,
+    openCallsCount: db.serviceCalls.filter(c => c.status === 'Open').length
+  });
+});
+
+app.get('/service-contracts', (req, res) => {
+  const contracts = store.getServiceContracts();
+  res.render('service-contracts', {
+    ...getCommonData('service-contracts', 'Service Contracts'),
+    contracts
+  });
+});
+
+app.get('/stock-inward', (req, res) => {
+  const inwards = store.getStockInward();
+  res.render('stock-inward', {
+    ...getCommonData('stock-inward', 'Stock Inward'),
+    inwards
+  });
+});
+
+app.get('/stock-outward', (req, res) => {
+  const outwards = store.getStockOutward();
+  res.render('stock-outward', {
+    ...getCommonData('stock-outward', 'Stock Outward'),
+    outwards
+  });
+});
+
+app.get('/activities', (req, res) => {
+  const leads = store.getLeads();
+  res.render('activities', {
+    ...getCommonData('activities', 'Activities / Follow-ups'),
+    leads
+  });
+});
+
+app.get('/leads', (req, res) => {
+  const leads = store.getLeads();
+  res.render('activities', {
+    ...getCommonData('leads', 'Activities / Follow-ups'),
+    leads
+  });
+});
+
+app.get('/enquiry', (req, res) => {
+  const leads = store.getLeads();
+  res.render('activities', {
+    ...getCommonData('enquiry', 'Activities / Follow-ups'),
+    leads
+  });
+});
+
 // Generic fallbacks for other ERP navigation items in mockup
 const moduleTitles = {
-  'sales-orders': 'Sales Orders',
-  'sales-invoices': 'Sales Invoices',
-  'sales-invoice-reprint': 'Sales Invoice Reprint',
-  'customer-equipment-cards': 'Customer Equipment Cards',
-  'service-dashboard': 'Service Dashboard',
-  'service-contracts': 'Service Contracts',
-  'stock-inward': 'Stock Inward',
-  'finance-receipts': 'Finance Receipts',
   'accounts': 'Chart of Accounts',
   'control-center': 'System Control Center',
   'reports': 'Management Reports'

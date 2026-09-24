@@ -1,4 +1,4 @@
-<%- include('partials/head', { pageTitle: 'Sales Orders - ERPPOS' }) %>
+<%- include('partials/head', { pageTitle: 'Sales Invoices - ERPPOS' }) %>
 
 <%- include('partials/sidebar') %>
 
@@ -10,10 +10,10 @@
 
       <!-- Header Row matching screenshot -->
       <div class="flex items-center justify-between">
-        <h1 class="text-lg font-bold text-slate-800">Sales Orders</h1>
+        <h1 class="text-lg font-bold text-slate-800">Sales Invoices</h1>
 
         <div class="flex items-center gap-2">
-          <button onclick="exportOrders()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 shadow-xs transition-colors">
+          <button onclick="exportInvoices()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-xs font-semibold text-slate-700 shadow-xs transition-colors">
             <span class="material-symbols-outlined text-[16px] text-slate-500">description</span>
             Export
           </button>
@@ -21,9 +21,9 @@
             <span class="material-symbols-outlined text-[16px] text-slate-500">sync</span>
             Refresh
           </button>
-          <button onclick="openNewOrderModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0284c7] hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all">
+          <button onclick="openNewInvoiceModal()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-[#0284c7] hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all">
             <span class="material-symbols-outlined text-[16px]">add</span>
-            New Order
+            New Invoice
           </button>
         </div>
       </div>
@@ -35,11 +35,11 @@
           <div class="flex items-center w-full bg-white rounded-lg px-3 py-1.5 border border-slate-200 focus-within:border-sky-500 transition-all">
             <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
             <input 
-              id="orderSearchInput" 
+              id="invoiceSearchInput" 
               class="bg-transparent border-none outline-none w-full text-xs text-slate-800 placeholder:text-slate-400" 
-              placeholder="Search by Order No, Customer, Mobile..." 
+              placeholder="Search by Invoice No, Customer, Mobile..." 
               type="text"
-              onkeyup="filterOrdersTable()"
+              onkeyup="filterInvoiceTable()"
             />
           </div>
         </div>
@@ -59,7 +59,7 @@
 
         <!-- Store Selector -->
         <div class="min-w-[140px]">
-          <select id="orderStoreFilter" onchange="filterOrdersTable()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
+          <select id="invoiceStoreFilter" onchange="filterInvoiceTable()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
             <option value="ARC1">ARC1 - ARC1</option>
             <option value="ARC2">ARC2 - ARC2</option>
             <option value="All">All Stores</option>
@@ -68,25 +68,24 @@
 
         <!-- Status Selector -->
         <div class="min-w-[130px]">
-          <select id="orderStatusFilter" onchange="filterOrdersTable()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
+          <select id="invoiceStatusFilter" onchange="filterInvoiceTable()" class="w-full bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
             <option value="All">All Status</option>
             <option value="OPEN">OPEN</option>
-            <option value="Invoiced">Invoiced</option>
-            <option value="Delivered">Delivered</option>
+            <option value="CLOSED">CLOSED</option>
           </select>
         </div>
       </div>
 
-      <!-- Orders Table matching screenshot media_1790274395585.png -->
+      <!-- Invoices Table matching screenshot -->
       <div class="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs" id="ordersTable">
+          <table class="w-full text-left text-xs" id="invoicesTable">
             <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
               <tr>
                 <th class="py-3 px-3 w-8">
                   <input type="checkbox" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
                 </th>
-                <th class="py-3 px-3">ORDER NO.</th>
+                <th class="py-3 px-3">INVOICE NO.</th>
                 <th class="py-3 px-3">DATE</th>
                 <th class="py-3 px-3">CUSTOMER CODE</th>
                 <th class="py-3 px-3">NAME</th>
@@ -94,49 +93,37 @@
                 <th class="py-3 px-3">STORE</th>
                 <th class="py-3 px-3">SALES PERSON</th>
                 <th class="py-3 px-3">NOTES</th>
-                <th class="py-3 px-3 text-right">ORDER VALUE</th>
-                <th class="py-3 px-3 text-center">ORDER STATUS</th>
+                <th class="py-3 px-3 text-right">INVOICE VALUE</th>
+                <th class="py-3 px-3 text-center">INVOICE STATUS</th>
                 <th class="py-3 px-3 text-center">APPROVED</th>
-                <th class="py-3 px-3 text-center">ACTIONS</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100 text-slate-700">
-              <% (salesOrders || []).forEach(o => { %>
+              <% salesInvoices.forEach(inv => { %>
                 <tr class="hover:bg-slate-50/80 transition-colors">
                   <td class="py-3 px-3">
                     <input type="checkbox" class="rounded border-slate-300 text-sky-600 focus:ring-sky-500" />
                   </td>
-                  <td class="py-3 px-3 font-mono font-semibold text-sky-600 hover:underline cursor-pointer" onclick="viewOrderSlip('<%= o.orderNo %>')">
-                    <%= o.orderNo %>
+                  <td class="py-3 px-3 font-mono font-semibold text-sky-600 hover:underline cursor-pointer" onclick="viewInvoiceDetails('<%= inv.invoiceNo %>')">
+                    <%= inv.invoiceNo %>
                   </td>
-                  <td class="py-3 px-3 text-slate-600 whitespace-nowrap"><%= o.date %></td>
-                  <td class="py-3 px-3 font-mono text-slate-600"><%= o.customerCode %></td>
-                  <td class="py-3 px-3 font-medium text-slate-800"><%= o.name || o.customerName %></td>
-                  <td class="py-3 px-3 font-mono text-slate-600"><%= o.mobile || '-' %></td>
-                  <td class="py-3 px-3 font-semibold text-slate-700"><%= o.store %></td>
-                  <td class="py-3 px-3 text-slate-600"><%= o.salesPerson || 'Admin' %></td>
-                  <td class="py-3 px-3 text-slate-400"><%= o.notes || '-' %></td>
+                  <td class="py-3 px-3 text-slate-600 whitespace-nowrap"><%= inv.date %></td>
+                  <td class="py-3 px-3 font-mono text-slate-600"><%= inv.customerCode %></td>
+                  <td class="py-3 px-3 font-medium text-slate-800"><%= inv.name %></td>
+                  <td class="py-3 px-3 font-mono text-slate-600"><%= inv.mobile %></td>
+                  <td class="py-3 px-3 font-semibold text-slate-700"><%= inv.store %></td>
+                  <td class="py-3 px-3 text-slate-600"><%= inv.salesPerson %></td>
+                  <td class="py-3 px-3 text-slate-500 truncate max-w-[140px]" title="<%= inv.notes %>"><%= inv.notes %></td>
                   <td class="py-3 px-3 text-right font-mono font-semibold text-slate-900 whitespace-nowrap">
-                    ₹<%= Number(o.orderValue || o.docTotal).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
+                    ₹<%= Number(inv.invoiceValue).toLocaleString('en-IN', { minimumFractionDigits: 2 }) %>
                   </td>
                   <td class="py-3 px-3 text-center">
                     <span class="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold bg-sky-100 text-sky-700 border border-sky-200">
-                      <%= o.orderStatus || o.status || 'OPEN' %>
+                      <%= inv.invoiceStatus %>
                     </span>
                   </td>
-                  <td class="py-3 px-3 text-center">
-                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      <%= o.approved || 'APPROVED' %>
-                    </span>
-                  </td>
-                  <td class="py-3 px-3 text-center whitespace-nowrap">
-                    <button 
-                      onclick="convertOrderToInvoice('<%= o.orderNo %>')"
-                      class="inline-flex items-center gap-1 px-2.5 py-1 border border-orange-300 bg-orange-50 hover:bg-orange-100 text-orange-700 rounded-lg text-xs font-semibold transition-all shadow-2xs active:scale-95"
-                    >
-                      <span class="material-symbols-outlined text-[15px]">swap_horiz</span>
-                      To Invoice
-                    </button>
+                  <td class="py-3 px-3 text-center text-slate-400 font-mono">
+                    <%= inv.approved || '-' %>
                   </td>
                 </tr>
               <% }); %>
@@ -147,7 +134,7 @@
         <!-- Table Footer / Pagination matching screenshot -->
         <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-600">
           <div class="flex items-center gap-4">
-            <span>Showing 1 to <%= (salesOrders || []).length %> of <%= Math.max(207, (salesOrders || []).length) %> entries</span>
+            <span>Showing 1 to <%= salesInvoices.length %> of <%= Math.max(103, salesInvoices.length) %> entries</span>
             <div class="flex items-center gap-1.5">
               <span>Rows:</span>
               <select class="bg-white border border-slate-200 rounded px-2 py-1 text-xs outline-none">
@@ -176,54 +163,65 @@
   </main>
 </div>
 
-<!-- Modal: New Order -->
-<div id="newOrderModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+<!-- New Invoice Modal -->
+<div id="newInvoiceModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
   <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
     <div class="flex items-center justify-between pb-3 border-b border-slate-200">
-      <h3 class="text-base font-bold text-slate-800">Create New Sales Order</h3>
-      <button onclick="closeNewOrderModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+      <h3 class="text-base font-bold text-slate-800">Create New Sales Invoice</h3>
+      <button onclick="closeNewInvoiceModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
         <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
     </div>
 
-    <form id="newOrderForm" onsubmit="submitNewOrder(event)" class="py-4 space-y-3 text-xs">
+    <form id="newInvoiceForm" onsubmit="submitNewInvoice(event)" class="py-4 space-y-3 text-xs">
       <div>
         <label class="block font-semibold text-slate-700 mb-1">Customer Name *</label>
-        <input type="text" id="orderCustName" required class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" placeholder="e.g. final fantasy" />
+        <input type="text" id="invCustName" required class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" placeholder="e.g. Ramesh Traders" />
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Mobile No</label>
-          <input type="tel" id="orderMobile" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="6552585888" />
+          <input type="tel" id="invMobile" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="98XXXXXXXX" />
         </div>
         <div>
           <label class="block font-semibold text-slate-700 mb-1">Store</label>
-          <select id="orderStore" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs">
+          <select id="invStore" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs">
             <option value="ARC1">ARC1</option>
             <option value="ARC2">ARC2</option>
           </select>
         </div>
       </div>
 
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Invoice Value (₹) *</label>
+          <input type="number" id="invAmount" required step="0.01" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="12500.00" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Sales Person</label>
+          <input type="text" id="invSalesPerson" value="Admin" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" />
+        </div>
+      </div>
+
       <div>
-        <label class="block font-semibold text-slate-700 mb-1">Order Value (₹) *</label>
-        <input type="number" id="orderAmount" required step="0.01" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="12500.00" />
+        <label class="block font-semibold text-slate-700 mb-1">Notes / Narration</label>
+        <input type="text" id="invNotes" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" placeholder="Direct Over the counter sale" />
       </div>
 
       <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
-        <button type="button" onclick="closeNewOrderModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-medium text-slate-700">Cancel</button>
-        <button type="submit" class="px-4 py-2 bg-[#0284c7] hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs">Create Order</button>
+        <button type="button" onclick="closeNewInvoiceModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-medium text-slate-700">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-[#0284c7] hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs">Generate Invoice</button>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  function filterOrdersTable() {
-    const q = document.getElementById('orderSearchInput').value.toLowerCase();
-    const status = document.getElementById('orderStatusFilter').value.toLowerCase();
-    const rows = document.querySelectorAll('#ordersTable tbody tr');
+  function filterInvoiceTable() {
+    const q = document.getElementById('invoiceSearchInput').value.toLowerCase();
+    const status = document.getElementById('invoiceStatusFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('#invoicesTable tbody tr');
 
     rows.forEach(r => {
       const text = r.innerText.toLowerCase();
@@ -233,26 +231,27 @@
     });
   }
 
-  function openNewOrderModal() {
-    document.getElementById('newOrderModal').classList.remove('hidden');
+  function openNewInvoiceModal() {
+    document.getElementById('newInvoiceModal').classList.remove('hidden');
   }
 
-  function closeNewOrderModal() {
-    document.getElementById('newOrderModal').classList.add('hidden');
+  function closeNewInvoiceModal() {
+    document.getElementById('newInvoiceModal').classList.add('hidden');
   }
 
-  async function submitNewOrder(e) {
+  async function submitNewInvoice(e) {
     e.preventDefault();
     const payload = {
-      customerName: document.getElementById('orderCustName').value.trim(),
-      mobile: document.getElementById('orderMobile').value.trim(),
-      store: document.getElementById('orderStore').value,
-      grossTotal: parseFloat(document.getElementById('orderAmount').value),
-      docTotal: parseFloat(document.getElementById('orderAmount').value)
+      name: document.getElementById('invCustName').value.trim(),
+      mobile: document.getElementById('invMobile').value.trim(),
+      store: document.getElementById('invStore').value,
+      invoiceValue: parseFloat(document.getElementById('invAmount').value),
+      salesPerson: document.getElementById('invSalesPerson').value.trim(),
+      notes: document.getElementById('invNotes').value.trim()
     };
 
     try {
-      const res = await fetch('/api/sales-orders', {
+      const res = await fetch('/api/sales-invoices', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
@@ -261,38 +260,19 @@
       if (data.success) {
         window.location.reload();
       } else {
-        alert(data.error || 'Failed to create sales order');
+        alert(data.error || 'Failed to create invoice');
       }
     } catch (err) {
       console.error(err);
-      alert('Error creating sales order');
+      alert('Error creating invoice');
     }
   }
 
-  async function convertOrderToInvoice(orderNo) {
-    if (!confirm(`Are you sure you want to convert Sales Order #${orderNo} to an official Sales Invoice?`)) return;
-    try {
-      const res = await fetch(`/api/sales-orders/${orderNo}/convert-to-invoice`, {
-        method: 'POST'
-      });
-      const data = await res.json();
-      if (data.success) {
-        alert(`Sales Order #${orderNo} converted to Invoice #${data.invoice.invoiceNo}!`);
-        window.location.href = '/sales-invoices';
-      } else {
-        alert(data.error || 'Conversion failed');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('Network error converting order');
-    }
+  function viewInvoiceDetails(no) {
+    window.location.href = `/sales-invoice-reprint`;
   }
 
-  function viewOrderSlip(orderNo) {
-    alert(`Sales Order #${orderNo} selected. Use "To Invoice" button to generate formal invoice.`);
-  }
-
-  function exportOrders() {
-    alert('Exporting sales orders list to CSV/Excel format...');
+  function exportInvoices() {
+    alert('Exporting invoices table to CSV/Excel format...');
   }
 </script>

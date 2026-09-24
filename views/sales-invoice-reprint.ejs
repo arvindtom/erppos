@@ -1,0 +1,211 @@
+<%- include('partials/head', { pageTitle: 'Sales Invoice Reprinting - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col bg-slate-50">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-28 px-6 pb-12 flex-1">
+    <div class="max-w-7xl mx-auto space-y-4">
+      
+      <!-- Title -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <h1 class="text-base font-bold text-slate-800 tracking-tight">Sales Invoice Reprinting</h1>
+        <span class="text-xs text-slate-500 font-medium"><%= invoices.length %> invoices available</span>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center w-full bg-slate-50 rounded-lg px-3 py-2 border border-slate-200/70 focus-within:border-sky-500 focus-within:bg-white transition-all">
+          <span class="material-symbols-outlined text-slate-400 text-[18px] mr-2">search</span>
+          <input 
+            id="reprintSearchInput"
+            class="bg-transparent border-none outline-none w-full text-xs text-slate-800 placeholder:text-slate-400"
+            placeholder="Search by Invoice No or Customer..." 
+            type="text"
+            onkeyup="filterReprintTable()"
+          />
+        </div>
+      </div>
+
+      <!-- Reprint Table -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs" id="reprintTable">
+            <thead class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+              <tr>
+                <th class="py-3 px-4">INVOICE NO.</th>
+                <th class="py-3 px-4">DATE</th>
+                <th class="py-3 px-4">CUSTOMER</th>
+                <th class="py-3 px-4">AMOUNT</th>
+                <th class="py-3 px-4">PRINT COUNT</th>
+                <th class="py-3 px-4 text-right">ACTION</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <% invoices.forEach(inv => { %>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                  <td class="py-3.5 px-4 font-mono font-semibold text-sky-600 hover:underline cursor-pointer" onclick="openInvoicePreview('<%= inv.invoiceNo %>', '<%= inv.customer %>', '<%= inv.amount %>', '<%= inv.date %>', <%= inv.printCount %>)">
+                    <%= inv.invoiceNo %>
+                  </td>
+                  <td class="py-3.5 px-4 text-slate-600"><%= inv.date %></td>
+                  <td class="py-3.5 px-4 font-medium text-slate-800"><%= inv.customer %></td>
+                  <td class="py-3.5 px-4 font-mono font-semibold text-slate-900">₹<%= Number(inv.amount).toLocaleString('en-IN') %></td>
+                  <td class="py-3.5 px-4">
+                    <span id="count-<%= inv.invoiceNo %>" class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px]">
+                      <%= inv.printCount %>
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-4 text-right">
+                    <button 
+                      onclick="reprintInvoice('<%= inv.invoiceNo %>', '<%= inv.customer %>', '<%= inv.amount %>', '<%= inv.date %>')"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-slate-300 rounded-lg text-xs font-medium text-slate-700 hover:bg-slate-50 active:scale-95 transition-all shadow-xs"
+                    >
+                      <span class="material-symbols-outlined text-[15px]">print</span>
+                      Reprint
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Printable Tax Invoice Modal -->
+<div id="invoiceReprintModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 relative">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-sky-600 text-2xl">receipt_long</span>
+        <div>
+          <h3 class="text-sm font-bold text-slate-800">Sales Invoice Duplicate Copy</h3>
+          <p id="modalSubtitle" class="text-[11px] text-slate-500 font-mono"></p>
+        </div>
+      </div>
+      <button onclick="closeInvoiceModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <div id="printableArea" class="py-4 space-y-4 text-xs">
+      <div class="text-center pb-2 border-b border-dashed border-slate-200">
+        <h4 class="font-bold text-sm text-slate-900 uppercase">BUSON DIGITAL SERVICES INDIA PVT LTD</h4>
+        <p class="text-[11px] text-slate-500">ARCH GATE - STOREs • ARC1 Retail Store</p>
+        <p class="text-[10px] text-slate-400 font-mono mt-0.5">GSTIN: 33AAACB1234F1Z5 • Phone: +91 9000011111</p>
+        <span class="inline-block mt-1 px-2 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] font-bold uppercase rounded">
+          TAX INVOICE - REPRINT COPY
+        </span>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 text-[11px] bg-slate-50 p-3 rounded-lg border border-slate-100">
+        <div>
+          <p class="text-slate-400">Invoice No:</p>
+          <p id="modalInvNo" class="font-bold font-mono text-slate-800"></p>
+        </div>
+        <div>
+          <p class="text-slate-400">Invoice Date:</p>
+          <p id="modalInvDate" class="font-bold text-slate-800"></p>
+        </div>
+        <div>
+          <p class="text-slate-400">Billed To:</p>
+          <p id="modalCustomer" class="font-bold text-slate-800"></p>
+        </div>
+        <div>
+          <p class="text-slate-400">Payment Status:</p>
+          <p class="font-bold text-emerald-600">PAID IN FULL</p>
+        </div>
+      </div>
+
+      <table class="w-full text-left text-xs border-y border-slate-200">
+        <thead class="text-[10px] uppercase text-slate-400">
+          <tr>
+            <th class="py-2">Item / Description</th>
+            <th class="py-2 text-right">Qty</th>
+            <th class="py-2 text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          <tr>
+            <td class="py-2 font-medium text-slate-800">Consumer Electronics / Hardware Item</td>
+            <td class="py-2 text-right">1</td>
+            <td id="modalItemAmount" class="py-2 text-right font-mono font-semibold"></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="space-y-1 text-right text-xs pt-2">
+        <div class="flex justify-between text-slate-500 text-[11px]">
+          <span>Taxable Value (GST 12% included):</span>
+          <span id="modalTaxableVal" class="font-mono"></span>
+        </div>
+        <div class="flex justify-between text-base font-bold text-slate-900 border-t border-slate-200 pt-2">
+          <span>Net Amount Paid:</span>
+          <span id="modalGrandTotal" class="font-mono text-sky-600"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
+      <button onclick="closeInvoiceModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-medium text-slate-700 transition-colors">
+        Cancel
+      </button>
+      <button onclick="triggerBrowserPrint()" class="flex items-center gap-1.5 px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs transition-all">
+        <span class="material-symbols-outlined text-[16px]">print</span>
+        Print Voucher
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let activeInvNo = '';
+
+  function filterReprintTable() {
+    const q = document.getElementById('reprintSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#reprintTable tbody tr');
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      r.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+
+  function openInvoicePreview(invNo, customer, amount, date, printCount) {
+    activeInvNo = invNo;
+    document.getElementById('modalInvNo').innerText = invNo;
+    document.getElementById('modalCustomer').innerText = customer;
+    document.getElementById('modalInvDate').innerText = date;
+    const num = Number(amount);
+    document.getElementById('modalItemAmount').innerText = '₹' + num.toLocaleString('en-IN');
+    document.getElementById('modalGrandTotal').innerText = '₹' + num.toLocaleString('en-IN');
+    document.getElementById('modalTaxableVal').innerText = '₹' + Math.round(num * 0.8928).toLocaleString('en-IN');
+    document.getElementById('modalSubtitle').innerText = `Print count: ${printCount}`;
+    document.getElementById('invoiceReprintModal').classList.remove('hidden');
+  }
+
+  async function reprintInvoice(invNo, customer, amount, date) {
+    openInvoicePreview(invNo, customer, amount, date, 1);
+    try {
+      const res = await fetch(`/api/sales-invoice-reprint/${invNo}/print`, { method: 'POST' });
+      const data = await res.json();
+      if (data.success && data.item) {
+        const badge = document.getElementById(`count-${invNo}`);
+        if (badge) badge.innerText = data.item.printCount;
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function closeInvoiceModal() {
+    document.getElementById('invoiceReprintModal').classList.add('hidden');
+  }
+
+  function triggerBrowserPrint() {
+    window.print();
+  }
+</script>

@@ -7,12 +7,24 @@ const DB_FILE = path.join(__dirname, 'db.json');
 let memoryDb = null;
 
 function readDb() {
-  if (memoryDb) return memoryDb;
+  if (memoryDb) {
+    for (const key of Object.keys(initialData)) {
+      if (!memoryDb[key] || (Array.isArray(initialData[key]) && memoryDb[key].length === 0 && initialData[key].length > 0)) {
+        memoryDb[key] = JSON.parse(JSON.stringify(initialData[key]));
+      }
+    }
+    return memoryDb;
+  }
   try {
     if (fs.existsSync(DB_FILE)) {
       const data = fs.readFileSync(DB_FILE, 'utf8');
       if (data.trim()) {
         memoryDb = JSON.parse(data);
+        for (const key of Object.keys(initialData)) {
+          if (!memoryDb[key] || (Array.isArray(initialData[key]) && memoryDb[key].length === 0 && initialData[key].length > 0)) {
+            memoryDb[key] = JSON.parse(JSON.stringify(initialData[key]));
+          }
+        }
         return memoryDb;
       }
     }
@@ -609,7 +621,11 @@ const store = {
     let list = db.stockInward || [];
     if (filters.search) {
       const q = filters.search.toLowerCase();
-      list = list.filter(s => s.docNo.toLowerCase().includes(q) || s.supplier.toLowerCase().includes(q));
+      list = list.filter(s => 
+        s.docNo.toLowerCase().includes(q) || 
+        (s.fromStore && s.fromStore.toLowerCase().includes(q)) ||
+        (s.targetStore && s.targetStore.toLowerCase().includes(q))
+      );
     }
     return list;
   },
@@ -617,20 +633,244 @@ const store = {
   addStockInward: (inwardData) => {
     const db = readDb();
     if (!db.stockInward) db.stockInward = [];
-    const count = db.stockInward.length + 121;
+    const count = db.stockInward.length + 13;
     const newInward = {
-      docNo: `INW-2026-${String(count).padStart(4, '0')}`,
+      docNo: inwardData.docNo || `260000${count}`,
       date: inwardData.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-      supplier: inwardData.supplier || 'Electronics Supplier',
-      store: inwardData.store || 'ARC1',
-      itemsCount: inwardData.itemsCount || 10,
-      docTotal: parseFloat(inwardData.docTotal) || 50000,
-      receivedBy: inwardData.receivedBy || 'Admin',
-      status: 'Received'
+      fromStore: inwardData.fromStore || 'ARC1',
+      toStore: inwardData.toStore || 'Transit',
+      targetStore: inwardData.targetStore || 'ARC2',
+      status: inwardData.status || 'IN-TRANSIT',
+      notes: inwardData.notes || '-',
+      ewayBillNo: inwardData.ewayBillNo || '-'
     };
     db.stockInward.unshift(newInward);
     writeDb(db);
     return newInward;
+  },
+
+  // Stock Outward
+  getStockOutward: (filters = {}) => {
+    const db = readDb();
+    let list = db.stockOutward || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(s => 
+        s.docNo.toLowerCase().includes(q) || 
+        (s.toStore && s.toStore.toLowerCase().includes(q))
+      );
+    }
+    return list;
+  },
+
+  addStockOutward: (outwardData) => {
+    const db = readDb();
+    if (!db.stockOutward) db.stockOutward = [];
+    const count = db.stockOutward.length + 13;
+    const newOutward = {
+      docNo: outwardData.docNo || `260000${count}`,
+      date: outwardData.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      fromStore: outwardData.fromStore || 'ARC1',
+      toStore: outwardData.toStore || 'ARC2',
+      status: outwardData.status || 'IN-TRANSIT',
+      notes: outwardData.notes || '-',
+      ewayBillNo: outwardData.ewayBillNo || '-'
+    };
+    db.stockOutward.unshift(newOutward);
+    writeDb(db);
+    return newOutward;
+  },
+
+  // Sales Invoices
+  getSalesInvoices: (filters = {}) => {
+    const db = readDb();
+    let list = db.salesInvoices || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(i => 
+        i.invoiceNo.toLowerCase().includes(q) || 
+        i.name.toLowerCase().includes(q) || 
+        i.mobile.includes(q) ||
+        i.customerCode.toLowerCase().includes(q)
+      );
+    }
+    if (filters.status && filters.status !== 'All Status') {
+      list = list.filter(i => i.invoiceStatus.toLowerCase() === filters.status.toLowerCase());
+    }
+    if (filters.store && filters.store !== 'All Stores' && !filters.store.includes('ARC1 - ARC1')) {
+      list = list.filter(i => i.store.toLowerCase().includes(filters.store.toLowerCase()));
+    }
+    return list;
+  },
+
+  addSalesInvoice: (invoiceData) => {
+    const db = readDb();
+    if (!db.salesInvoices) db.salesInvoices = [];
+    const count = db.salesInvoices.length + 113;
+    const invoiceNo = `260200${count}`;
+    const value = parseFloat(invoiceData.invoiceValue) || 12500.00;
+
+    const newInvoice = {
+      invoiceNo,
+      date: invoiceData.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customerCode: invoiceData.customerCode || 'C' + (invoiceData.mobile || '9999999999'),
+      name: invoiceData.name || 'Customer',
+      mobile: invoiceData.mobile || '-',
+      store: invoiceData.store || 'ARC1',
+      salesPerson: invoiceData.salesPerson || 'Admin',
+      notes: invoiceData.notes || '-',
+      invoiceValue: value,
+      invoiceStatus: 'OPEN',
+      approved: '-'
+    };
+    db.salesInvoices.unshift(newInvoice);
+
+    // Also add to salesInvoiceReprint list
+    if (!db.salesInvoiceReprint) db.salesInvoiceReprint = [];
+    db.salesInvoiceReprint.unshift({
+      invoiceNo,
+      date: newInvoice.date,
+      customer: newInvoice.name,
+      amount: value,
+      printCount: 1
+    });
+
+    writeDb(db);
+    return newInvoice;
+  },
+
+  convertOrderToInvoice: (orderNo) => {
+    const db = readDb();
+    const order = (db.salesOrders || []).find(o => o.orderNo === orderNo);
+    if (!order) throw new Error('Order not found');
+
+    if (!db.salesInvoices) db.salesInvoices = [];
+    const count = db.salesInvoices.length + 113;
+    const invoiceNo = `260200${count}`;
+
+    const newInvoice = {
+      invoiceNo,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customerCode: order.customerCode,
+      name: order.name || order.customerName,
+      mobile: order.mobile,
+      store: order.store || 'ARC1',
+      salesPerson: order.salesPerson || 'Admin',
+      notes: `[Converted from SO ${order.orderNo}]`,
+      invoiceValue: order.orderValue || order.docTotal,
+      invoiceStatus: 'OPEN',
+      approved: '-'
+    };
+    db.salesInvoices.unshift(newInvoice);
+
+    // Also add to reprint
+    if (!db.salesInvoiceReprint) db.salesInvoiceReprint = [];
+    db.salesInvoiceReprint.unshift({
+      invoiceNo,
+      date: newInvoice.date,
+      customer: newInvoice.name,
+      amount: newInvoice.invoiceValue,
+      printCount: 1
+    });
+
+    order.orderStatus = 'Invoiced';
+    writeDb(db);
+    return newInvoice;
+  },
+
+  // Sales Invoice Reprint
+  getSalesInvoiceReprint: (filters = {}) => {
+    const db = readDb();
+    let list = db.salesInvoiceReprint || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(r => r.invoiceNo.toLowerCase().includes(q) || r.customer.toLowerCase().includes(q));
+    }
+    return list;
+  },
+
+  incrementPrintCount: (invoiceNo) => {
+    const db = readDb();
+    const inv = (db.salesInvoiceReprint || []).find(r => r.invoiceNo === invoiceNo);
+    if (inv) {
+      inv.printCount = (inv.printCount || 0) + 1;
+      writeDb(db);
+      return inv;
+    }
+    return null;
+  },
+
+  // Service Contracts
+  getServiceContracts: (filters = {}) => {
+    const db = readDb();
+    let list = db.serviceContracts || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(c => c.contractNo.toLowerCase().includes(q) || c.customer.toLowerCase().includes(q) || c.type.toLowerCase().includes(q));
+    }
+    return list;
+  },
+
+  addServiceContract: (contractData) => {
+    const db = readDb();
+    if (!db.serviceContracts) db.serviceContracts = [];
+    const count = db.serviceContracts.length + 1;
+    const contractNo = `CNT-${String(count).padStart(6, '0')}`;
+    const newContract = {
+      contractNo,
+      date: contractData.date || new Date().toISOString().split('T')[0],
+      customer: contractData.customer || 'Customer',
+      type: contractData.type || 'Warranty',
+      start: contractData.start || new Date().toISOString().split('T')[0],
+      end: contractData.end || '2027-01-09',
+      billing: contractData.billing || 'Free',
+      amount: contractData.amount || '0.00',
+      responseHrs: parseInt(contractData.responseHrs) || 24,
+      status: 'Active'
+    };
+    db.serviceContracts.unshift(newContract);
+    writeDb(db);
+    return newContract;
+  },
+
+  // Leads / Activities
+  getLeads: (filters = {}) => {
+    const db = readDb();
+    let list = db.leads || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(l => 
+        l.leadName.toLowerCase().includes(q) || 
+        l.phone.includes(q) ||
+        l.branch.toLowerCase().includes(q) ||
+        l.leadStage.toLowerCase().includes(q)
+      );
+    }
+    if (filters.branch && filters.branch !== 'All' && !filters.branch.includes('ARC1')) {
+      list = list.filter(l => l.branch.toLowerCase().includes(filters.branch.toLowerCase()));
+    }
+    return list;
+  },
+
+  addLead: (leadData) => {
+    const db = readDb();
+    if (!db.leads) db.leads = [];
+    const count = db.leads.length + 1;
+    const newLead = {
+      id: `LEAD-${String(count).padStart(3, '0')}`,
+      type: 'Lead',
+      scheduledOn: leadData.scheduledOn || '—',
+      leadName: leadData.leadName,
+      phone: leadData.phone || '-',
+      branch: leadData.branch || 'ARC1',
+      activity: leadData.activity || '—',
+      assignedTo: leadData.assignedTo || 'Admin',
+      leadStage: leadData.leadStage || 'New',
+      outcome: '—'
+    };
+    db.leads.unshift(newLead);
+    writeDb(db);
+    return newLead;
   },
 
   // Point of Sale Checkout (POS Sale)

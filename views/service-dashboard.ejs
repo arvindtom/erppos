@@ -1,0 +1,250 @@
+<%- include('partials/head', { pageTitle: 'Service Dashboard - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col bg-slate-50">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-28 px-6 pb-12 flex-1">
+    <div class="w-full space-y-5">
+
+      <!-- 8 Metric KPI Cards matching screenshot media_1790274409437.png -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- 1. Open Service Calls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs border-l-4 border-l-sky-500 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">OPEN SERVICE CALLS</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1"><%= openCallsCount || 4 %></h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">build</span>
+          </div>
+        </div>
+
+        <!-- 2. Assigned Today -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">ASSIGNED TODAY</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">1</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">how_to_reg</span>
+          </div>
+        </div>
+
+        <!-- 3. Pending Technician Visit -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs border-l-4 border-l-amber-500 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">PENDING TECHNICIAN VISIT</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">2</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">calendar_today</span>
+          </div>
+        </div>
+
+        <!-- 4. Overdue Calls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs border-l-4 border-l-red-500 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">OVERDUE CALLS</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">2</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">warning</span>
+          </div>
+        </div>
+
+        <!-- 5. Closed This Month -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs border-l-4 border-l-emerald-500 flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">CLOSED THIS MONTH</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">1</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">check_circle</span>
+          </div>
+        </div>
+
+        <!-- 6. Warranty Calls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">WARRANTY CALLS</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">3</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">verified_user</span>
+          </div>
+        </div>
+
+        <!-- 7. AMC Calls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">AMC CALLS</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">2</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">schedule</span>
+          </div>
+        </div>
+
+        <!-- 8. Chargeable Calls -->
+        <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+          <div>
+            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">CHARGEABLE CALLS</p>
+            <h3 class="text-2xl font-bold text-slate-800 mt-1">1</h3>
+          </div>
+          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center text-slate-600">
+            <span class="material-symbols-outlined text-[20px]">payments</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row matching screenshot media_1790274409437.png -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <!-- Service Calls by Status (Donut) -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col">
+          <h3 class="text-xs font-bold text-slate-700 mb-3">Service Calls by Status</h3>
+          <div class="flex-1 flex flex-col items-center justify-center relative min-h-[220px]">
+            <canvas id="statusChart" class="max-h-[190px]"></canvas>
+          </div>
+        </div>
+
+        <!-- Service Calls by Priority (Bar) -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col">
+          <h3 class="text-xs font-bold text-slate-700 mb-3">Service Calls by Priority</h3>
+          <div class="flex-1 min-h-[220px]">
+            <canvas id="priorityChart" class="max-h-[190px] w-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Technician Workload -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col">
+          <h3 class="text-xs font-bold text-slate-700 mb-3">Technician Workload</h3>
+          <div class="flex-1 min-h-[200px]">
+            <canvas id="workloadChart" class="max-h-[180px] w-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Call Aging -->
+        <div class="bg-white p-5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col">
+          <h3 class="text-xs font-bold text-slate-700 mb-3">Call Aging</h3>
+          <div class="flex-1 min-h-[200px]">
+            <canvas id="agingChart" class="max-h-[180px] w-full"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // 1. Status Donut Chart matching screenshot
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Assigned (1)', 'In Progress (1)', 'Open (1)', 'Pending Spare (1)', 'Resolved (1)', 'Closed (1)'],
+      datasets: [{
+        data: [1, 1, 1, 1, 1, 1],
+        backgroundColor: [
+          '#3b82f6', // Assigned
+          '#f97316', // In Progress
+          '#10b981', // Open
+          '#ef4444', // Pending Spare
+          '#8b5cf6', // Resolved
+          '#06b6d4'  // Closed
+        ],
+        borderWidth: 2,
+        borderColor: '#ffffff'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { boxWidth: 10, font: { size: 10, family: 'Inter' } }
+        }
+      },
+      cutout: '62%'
+    }
+  });
+
+  // 2. Priority Bar Chart matching screenshot
+  new Chart(document.getElementById('priorityChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Low', 'Medium', 'High', 'Critical'],
+      datasets: [{
+        data: [1, 2, 2, 1],
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+        barPercentage: 0.6
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { stepSize: 0.5, font: { size: 10 } },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // 3. Workload Bar Chart
+  new Chart(document.getElementById('workloadChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Ramesh', 'Naresh', 'Suresh', 'Mahesh'],
+      datasets: [{
+        data: [4, 5, 3, 2],
+        backgroundColor: '#f59e0b',
+        borderRadius: 4,
+        barPercentage: 0.5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // 4. Aging Bar Chart
+  new Chart(document.getElementById('agingChart'), {
+    type: 'bar',
+    data: {
+      labels: ['0-2 Days', '3-5 Days', '> 5 Days'],
+      datasets: [{
+        data: [3, 2, 1],
+        backgroundColor: '#ef4444',
+        borderRadius: 4,
+        barPercentage: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+</script>

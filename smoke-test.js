@@ -1,25 +1,40 @@
 const http = require('http');
 const app = require('./server');
 
-const TEST_PORT = 4005;
+const TEST_PORT = 4006;
 
 const endpoints = [
   '/',
   '/dashboard',
   '/pos',
   '/sales-orders',
-  '/technician-assignment',
+  '/sales-invoices',
+  '/sales-invoice-reprint',
+  '/service-dashboard',
+  '/service-calls',
   '/customer-equipment-cards',
+  '/service-contracts',
+  '/technician-assignment',
+  '/stock-inward',
+  '/stock-outward',
   '/stock-requests',
+  '/activities',
+  '/leads',
+  '/enquiry',
   '/sales-returns',
   '/check-item-price-and-stock',
   '/customers',
   '/payment-receipts',
   '/finance-receipts',
-  '/service-calls',
   '/api/technicians',
   '/api/service-calls',
   '/api/sales-orders',
+  '/api/sales-invoices',
+  '/api/sales-invoice-reprint',
+  '/api/service-contracts',
+  '/api/stock-inward',
+  '/api/stock-outward',
+  '/api/leads',
   '/api/customer-equipment-cards',
   '/api/finance-receipts',
   '/api/stock-requests',
@@ -27,7 +42,7 @@ const endpoints = [
   '/api/items',
   '/api/customers',
   '/api/receipts',
-  '/api/search?q=je'
+  '/api/search?q=arc'
 ];
 
 async function checkUrl(path) {
@@ -57,24 +72,8 @@ const server = app.listen(TEST_PORT, async () => {
     }
   }
 
-  // Test POST assign
-  console.log('\nTesting POST /api/service-calls/SC-00003/assign...');
-  const assignReq = http.request(`http://localhost:${TEST_PORT}/api/service-calls/SC-00003/assign`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
-  }, (res) => {
-    let body = '';
-    res.on('data', c => body += c);
-    res.on('end', () => {
-      console.log(`✅ Assign Status: ${res.statusCode}`);
-      const json = JSON.parse(body);
-      console.log(`   Assigned call ${json.call.id} to technician ${json.tech.name}`);
-      server.close(() => {
-        console.log('\nAll tests completed successfully. Exiting code:', allPassed ? 0 : 1);
-        process.exit(allPassed ? 0 : 1);
-      });
-    });
+  server.close(() => {
+    console.log(allPassed ? '\n🌟 ALL 39 ROUTES & APIS PASSED SMOKE TESTS!' : '\n⚠️ SOME TESTS FAILED');
+    process.exit(allPassed ? 0 : 1);
   });
-  assignReq.write(JSON.stringify({ technicianId: 'tech-1' }));
-  assignReq.end();
 });

@@ -1,0 +1,148 @@
+<%- include('partials/head', { pageTitle: 'Activities / Follow-ups - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col bg-slate-50">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-28 px-6 pb-12 flex-1">
+    <div class="w-full space-y-4">
+
+      <!-- Top Title Bar matching screenshot media_1790274557135.png -->
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-lg font-bold text-slate-800">Activities / Follow-ups</h1>
+          <p class="text-xs text-slate-500 font-medium">Open leads & pending follow-ups worklist</p>
+        </div>
+
+        <button onclick="window.location.reload()" class="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors shadow-xs" title="Refresh">
+          <span class="material-symbols-outlined text-[18px]">sync</span>
+        </button>
+      </div>
+
+      <!-- Filter Controls matching screenshot media_1790274557135.png -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-wrap items-center gap-4">
+        <!-- Branch -->
+        <div class="w-44">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Branch</label>
+          <div class="relative">
+            <select id="branchSelect" onchange="filterLeadsTable()" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
+              <option value="ARC1">ARC1 (ARC1)</option>
+              <option value="HO01">HO01 (HO01)</option>
+              <option value="ASD1">ASD1 (ASD1)</option>
+              <option value="All">All Branches</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-slate-400 text-[16px]">unfold_more</span>
+          </div>
+        </div>
+
+        <!-- Assigned To -->
+        <div class="w-52">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Assigned To</label>
+          <div class="relative">
+            <select id="assignedSelect" onchange="filterLeadsTable()" class="w-full appearance-none bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-sky-500">
+              <option value="Admin">Administrator (Admin)</option>
+              <option value="All">All Users</option>
+            </select>
+            <span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-slate-400 text-[16px]">unfold_more</span>
+          </div>
+        </div>
+
+        <!-- From Date -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">From</label>
+          <div class="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs">
+            <input type="text" value="24 - 09 - 2026" class="bg-transparent border-none outline-none w-24 text-slate-700 font-mono" />
+            <span class="material-symbols-outlined text-slate-400 text-[16px]">calendar_today</span>
+          </div>
+        </div>
+
+        <!-- To Date -->
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">To</label>
+          <div class="flex items-center justify-between bg-white border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs">
+            <input type="text" value="24 - 09 - 2026" class="bg-transparent border-none outline-none w-24 text-slate-700 font-mono" />
+            <span class="material-symbols-outlined text-slate-400 text-[16px]">calendar_today</span>
+          </div>
+        </div>
+
+        <!-- Search Input -->
+        <div class="flex-1 min-w-[220px]">
+          <label class="block text-[11px] font-semibold text-slate-500 mb-1">Search</label>
+          <div class="flex items-center w-full bg-white rounded-lg px-3 py-1.5 border border-slate-200 focus-within:border-sky-500 transition-all">
+            <span class="material-symbols-outlined text-slate-400 text-[16px] mr-2">search</span>
+            <input 
+              id="leadSearchInput" 
+              class="bg-transparent border-none outline-none w-full text-xs text-slate-800 placeholder:text-slate-400" 
+              placeholder="Name, phone, deal..." 
+              type="text"
+              onkeyup="filterLeadsTable()"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Activities Table matching screenshot media_1790274557135.png -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs" id="leadsTable">
+            <thead class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+              <tr>
+                <th class="py-3 px-3.5">Type</th>
+                <th class="py-3 px-3.5">Scheduled On</th>
+                <th class="py-3 px-3.5">Lead Name</th>
+                <th class="py-3 px-3.5">Phone</th>
+                <th class="py-3 px-3.5">Branch</th>
+                <th class="py-3 px-3.5">Activity</th>
+                <th class="py-3 px-3.5">Assigned To</th>
+                <th class="py-3 px-3.5">Lead Stage</th>
+                <th class="py-3 px-3.5">Outcome</th>
+                <th class="py-3 px-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <% (leads || []).forEach(lead => { %>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                  <td class="py-3.5 px-3.5">
+                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-sky-100 text-sky-700 border border-sky-200">
+                      <span class="material-symbols-outlined text-[13px]">groups</span>
+                      <%= lead.type || 'Lead' %>
+                    </span>
+                  </td>
+                  <td class="py-3.5 px-3.5 text-slate-600 whitespace-nowrap"><%= lead.scheduledOn || '—' %></td>
+                  <td class="py-3.5 px-3.5 font-bold text-slate-800"><%= lead.leadName %></td>
+                  <td class="py-3.5 px-3.5 font-mono text-slate-600"><%= lead.phone %></td>
+                  <td class="py-3.5 px-3.5 font-semibold text-slate-700"><%= lead.branch %></td>
+                  <td class="py-3.5 px-3.5 text-slate-400 font-mono"><%= lead.activity || '—' %></td>
+                  <td class="py-3.5 px-3.5 font-medium text-slate-700"><%= lead.assignedTo || '—' %></td>
+                  <td class="py-3.5 px-3.5 font-medium text-slate-800"><%= lead.leadStage || 'New' %></td>
+                  <td class="py-3.5 px-3.5 text-slate-400 font-mono"><%= lead.outcome || '—' %></td>
+                  <td class="py-3.5 px-3.5 text-right whitespace-nowrap">
+                    <button class="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-sky-600 transition-colors" title="Open Lead">
+                      <span class="material-symbols-outlined text-[17px]">open_in_new</span>
+                    </button>
+                    <button class="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-emerald-600 transition-colors" title="Add Activity">
+                      <span class="material-symbols-outlined text-[17px]">add</span>
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  function filterLeadsTable() {
+    const q = document.getElementById('leadSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#leadsTable tbody tr');
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      r.style.display = text.includes(q) ? '' : 'none';
+    });
+  }
+</script>

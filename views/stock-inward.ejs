@@ -1,0 +1,203 @@
+<%- include('partials/head', { pageTitle: 'Stock Inward - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col bg-slate-50">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-28 px-6 pb-12 flex-1">
+    <div class="w-full space-y-4">
+
+      <!-- Header Row matching screenshot media_1790274409444.png -->
+      <div class="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-xs">
+            <span class="material-symbols-outlined text-[22px]">inventory_2</span>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-base font-bold text-slate-800">Stock Inward</h1>
+              <span class="text-xs text-slate-500 font-medium">• <%= (inwards || []).length %> records</span>
+            </div>
+            <p class="text-xs text-slate-500 font-medium">Incoming transfers awaiting receipt — convert directly to inward</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="window.location.reload()" class="w-9 h-9 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 flex items-center justify-center text-slate-600 transition-colors shadow-xs" title="Refresh">
+            <span class="material-symbols-outlined text-[18px]">sync</span>
+          </button>
+          <button onclick="openNewInwardModal()" class="inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold shadow-xs transition-all active:scale-95">
+            <span class="material-symbols-outlined text-[16px]">add</span>
+            New Stock Inward
+          </button>
+        </div>
+      </div>
+
+      <!-- Table with inline filter inputs matching screenshot media_1790274409444.png -->
+      <div class="bg-white rounded-xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs" id="inwardTable">
+            <thead class="bg-slate-50/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200/80">
+              <tr>
+                <th class="py-2.5 px-3">DOC NO</th>
+                <th class="py-2.5 px-3">DATE</th>
+                <th class="py-2.5 px-3">FROM STORE</th>
+                <th class="py-2.5 px-3">TO STORE</th>
+                <th class="py-2.5 px-3">TARGET STORE</th>
+                <th class="py-2.5 px-3">STATUS</th>
+                <th class="py-2.5 px-3">NOTES</th>
+                <th class="py-2.5 px-3">EWAY BILL NO</th>
+                <th class="py-2.5 px-3 text-right">ACTIONS</th>
+              </tr>
+              <!-- Filter Row under headers -->
+              <tr class="bg-slate-50/40 border-b border-slate-200/60 text-slate-400 font-normal">
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(0, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(1, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(2, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(3, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(4, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(5, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(6, this.value)" /></th>
+                <th class="p-1.5"><input type="text" placeholder="Filter" class="w-full bg-white border border-slate-200 rounded px-2 py-1 text-[11px] outline-none font-normal" onkeyup="filterColumn(7, this.value)" /></th>
+                <th class="p-1.5"></th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-slate-700">
+              <% (inwards || []).forEach(inw => { %>
+                <tr class="hover:bg-slate-50/80 transition-colors">
+                  <td class="py-3 px-3 font-mono font-semibold text-sky-600 hover:underline cursor-pointer" onclick="viewInwardDoc('<%= inw.docNo %>')">
+                    <%= inw.docNo %>
+                  </td>
+                  <td class="py-3 px-3 text-slate-600 whitespace-nowrap"><%= inw.date %></td>
+                  <td class="py-3 px-3 font-semibold text-slate-800"><%= inw.fromStore %></td>
+                  <td class="py-3 px-3 text-slate-600"><%= inw.toStore %></td>
+                  <td class="py-3 px-3 font-medium text-slate-800"><%= inw.targetStore %></td>
+                  <td class="py-3 px-3">
+                    <span class="inline-block px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-700 border border-sky-200">
+                      <%= inw.status %>
+                    </span>
+                  </td>
+                  <td class="py-3 px-3 text-slate-400 font-mono"><%= inw.notes || '-' %></td>
+                  <td class="py-3 px-3 text-slate-400 font-mono"><%= inw.ewayBillNo || '-' %></td>
+                  <td class="py-3 px-3 text-right whitespace-nowrap">
+                    <button onclick="viewInwardDoc('<%= inw.docNo %>')" class="p-1 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-800 transition-colors" title="View Document">
+                      <span class="material-symbols-outlined text-[17px]">visibility</span>
+                    </button>
+                    <button onclick="receiveInwardStock('<%= inw.docNo %>')" class="p-1 hover:bg-orange-50 rounded text-orange-500 hover:text-orange-700 transition-colors" title="Receive to Stock">
+                      <span class="material-symbols-outlined text-[17px]">move_to_inbox</span>
+                    </button>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: New Stock Inward -->
+<div id="newInwardModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      <h3 class="text-base font-bold text-slate-800">Add Stock Inward Entry</h3>
+      <button onclick="closeNewInwardModal()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <form id="newInwardForm" onsubmit="submitNewInward(event)" class="py-4 space-y-3 text-xs">
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Doc Number</label>
+          <input type="text" id="inwDocNo" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="26000013" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Date</label>
+          <input type="text" id="inwDate" value="24 Sep 2026" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" />
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-3">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">From Store</label>
+          <input type="text" id="inwFromStore" value="ARC1" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-bold" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">To Store</label>
+          <input type="text" id="inwToStore" value="Transit" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Target Store</label>
+          <input type="text" id="inwTargetStore" value="ARC2" class="w-full px-3 py-2 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-bold" />
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-slate-200 flex justify-end gap-2">
+        <button type="button" onclick="closeNewInwardModal()" class="px-4 py-2 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-medium text-slate-700">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs font-semibold shadow-xs">Save Inward</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  function filterColumn(colIndex, val) {
+    const table = document.getElementById('inwardTable');
+    const rows = table.getElementsByTagName('tbody')[0].getElementsByTagName('tr');
+    val = val.toLowerCase();
+
+    for (let i = 0; i < rows.length; i++) {
+      const cells = rows[i].getElementsByTagName('td');
+      if (cells[colIndex]) {
+        const text = cells[colIndex].innerText.toLowerCase();
+        rows[i].style.display = text.includes(val) ? '' : 'none';
+      }
+    }
+  }
+
+  function openNewInwardModal() {
+    document.getElementById('newInwardModal').classList.remove('hidden');
+  }
+
+  function closeNewInwardModal() {
+    document.getElementById('newInwardModal').classList.add('hidden');
+  }
+
+  async function submitNewInward(e) {
+    e.preventDefault();
+    const payload = {
+      docNo: document.getElementById('inwDocNo').value.trim() || undefined,
+      date: document.getElementById('inwDate').value.trim(),
+      fromStore: document.getElementById('inwFromStore').value.trim(),
+      toStore: document.getElementById('inwToStore').value.trim(),
+      targetStore: document.getElementById('inwTargetStore').value.trim()
+    };
+
+    try {
+      const res = await fetch('/api/stock-inward', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function viewInwardDoc(no) {
+    alert(`Transfer Doc #${no} details: Status IN-TRANSIT. Awaiting physical gate inward count confirmation.`);
+  }
+
+  function receiveInwardStock(no) {
+    alert(`Successfully marked Doc #${no} as received into local inventory!`);
+    window.location.reload();
+  }
+</script>

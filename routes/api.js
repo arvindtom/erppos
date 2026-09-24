@@ -212,6 +212,90 @@ router.post('/sales-orders', (req, res) => {
   }
 });
 
+router.post('/sales-orders/:id/convert-to-invoice', (req, res) => {
+  try {
+    const invoice = store.convertOrderToInvoice(req.params.id);
+    res.json({ success: true, invoice });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Sales Invoices
+router.get('/sales-invoices', (req, res) => {
+  const list = store.getSalesInvoices(req.query);
+  res.json(list);
+});
+
+router.post('/sales-invoices', (req, res) => {
+  try {
+    const invoice = store.addSalesInvoice(req.body);
+    res.status(201).json({ success: true, invoice });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Sales Invoice Reprint
+router.get('/sales-invoice-reprint', (req, res) => {
+  const list = store.getSalesInvoiceReprint(req.query);
+  res.json(list);
+});
+
+router.post('/sales-invoice-reprint/:id/print', (req, res) => {
+  try {
+    const updated = store.incrementPrintCount(req.params.id);
+    res.json({ success: true, item: updated });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Service Contracts
+router.get('/service-contracts', (req, res) => {
+  const list = store.getServiceContracts(req.query);
+  res.json(list);
+});
+
+router.post('/service-contracts', (req, res) => {
+  try {
+    const contract = store.addServiceContract(req.body);
+    res.status(201).json({ success: true, contract });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Stock Outward
+router.get('/stock-outward', (req, res) => {
+  const list = store.getStockOutward(req.query);
+  res.json(list);
+});
+
+router.post('/stock-outward', (req, res) => {
+  try {
+    const outward = store.addStockOutward(req.body);
+    res.status(201).json({ success: true, outward });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
+// Leads & Activities
+router.get('/leads', (req, res) => {
+  const list = store.getLeads(req.query);
+  res.json(list);
+});
+
+router.post('/leads', (req, res) => {
+  try {
+    const lead = store.addLead(req.body);
+    res.status(201).json({ success: true, lead });
+  } catch (err) {
+    res.status(400).json({ success: false, error: err.message });
+  }
+});
+
 // Customer Equipment Cards
 router.get('/customer-equipment-cards', (req, res) => {
   const list = store.getCustomerEquipmentCards(req.query);
