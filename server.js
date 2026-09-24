@@ -37,14 +37,46 @@ function getCommonData(currentPath, pageTitle) {
 
 // Routes matching the mockups
 app.get('/', (req, res) => {
-  res.redirect('/technician-assignment');
+  res.redirect('/dashboard');
 });
 
 app.get('/dashboard', (req, res) => {
   const db = store.getDb();
   res.render('dashboard', {
-    ...getCommonData('dashboard', 'Dashboard - ERPPOS'),
+    ...getCommonData('dashboard', 'Enterprise ERP & POS Dashboard'),
     db
+  });
+});
+
+app.get('/pos', (req, res) => {
+  const items = store.getItems();
+  res.render('pos', {
+    ...getCommonData('pos', 'Point of Sale (POS) Terminal'),
+    items
+  });
+});
+
+app.get('/sales-orders', (req, res) => {
+  const salesOrders = store.getSalesOrders();
+  res.render('sales-orders', {
+    ...getCommonData('sales-orders', 'Sales Orders'),
+    salesOrders
+  });
+});
+
+app.get('/customer-equipment-cards', (req, res) => {
+  const customerEquipmentCards = store.getCustomerEquipmentCards();
+  res.render('customer-equipment-cards', {
+    ...getCommonData('customer-equipment-cards', 'Customer Equipment Cards'),
+    customerEquipmentCards
+  });
+});
+
+app.get('/finance-receipts', (req, res) => {
+  const financeReceipts = store.getFinanceReceipts();
+  res.render('finance-receipts', {
+    ...getCommonData('finance-receipts', 'Finance Receipts'),
+    financeReceipts
   });
 });
 

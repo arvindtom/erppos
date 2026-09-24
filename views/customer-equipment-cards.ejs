@@ -1,0 +1,217 @@
+<%- include('partials/head', { pageTitle: 'Customer Equipment Cards - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Module Navigation Tabs (Matching Screenshot) -->
+      <div class="flex items-center gap-1 overflow-x-auto pb-2 border-b border-surface-container mb-space-md text-xs font-medium">
+        <a href="/dashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[16px]">dashboard</span> Dashboard
+        </a>
+        <a href="/service-dashboard" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[16px]">support_agent</span> Service Dashboard
+        </a>
+        <a href="/service-calls" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[16px]">phone_in_talk</span> Service Calls
+        </a>
+        <a href="/customer-equipment-cards" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500 text-white font-semibold shadow-sm">
+          <span class="material-symbols-outlined text-[16px]">devices</span> Customer Equipment Cards
+        </a>
+        <a href="/technician-assignment" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container transition-colors">
+          <span class="material-symbols-outlined text-[16px]">engineering</span> Technician Assignment
+        </a>
+      </div>
+
+      <!-- Banner Header -->
+      <div class="flex items-center justify-between mb-space-md bg-gradient-to-r from-sky-50 via-surface-container-low to-orange-50/40 p-space-md rounded-xl border border-outline-variant/20 shadow-sm">
+        <div class="flex items-center gap-space-md">
+          <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-sm">
+            <span class="material-symbols-outlined text-[24px]">tv</span>
+          </div>
+          <div>
+            <h1 class="font-headline-md text-on-surface">Customer Equipment Cards</h1>
+            <p class="text-xs text-on-surface-variant"><span id="eqCardsCount"><%= (customerEquipmentCards || []).length %></span> of <%= (customerEquipmentCards || []).length %> cards</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="location.reload()" class="w-8 h-8 rounded-lg bg-surface-container hover:bg-surface-container-high flex items-center justify-center text-on-surface transition-colors" title="Refresh">
+            <span class="material-symbols-outlined text-[18px]">refresh</span>
+          </button>
+          <button onclick="openModal('addCardModal')" class="flex items-center gap-1 bg-sky-600 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:opacity-90 shadow-sm">
+            <span class="material-symbols-outlined text-[16px]">add</span> Add Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="mb-space-md">
+        <div class="flex items-center bg-surface-container-lowest px-space-md py-2 rounded-xl border border-outline-variant/30 shadow-sm max-w-md">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">search</span>
+          <input 
+            id="eqSearchInput" 
+            oninput="filterEquipmentCards()" 
+            class="bg-transparent border-none outline-none w-full text-body-md text-on-surface placeholder:text-on-surface-variant" 
+            placeholder="Search customer / serial / item / brand..." 
+            type="text"
+          />
+        </div>
+      </div>
+
+      <!-- Data Table Matching Screenshot -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/20">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-body-sm">
+            <thead>
+              <tr class="bg-surface-container-low text-on-surface-variant text-label-sm font-semibold border-b border-surface-container">
+                <th class="py-3 px-space-md">Customer</th>
+                <th class="py-3 px-space-md">Item</th>
+                <th class="py-3 px-space-md">Serial</th>
+                <th class="py-3 px-space-md">Model</th>
+                <th class="py-3 px-space-md">Brand</th>
+                <th class="py-3 px-space-md">Warranty To</th>
+                <th class="py-3 px-space-md">Contract</th>
+                <th class="py-3 px-space-md">Status</th>
+              </tr>
+            </thead>
+            <tbody id="eqTableBody" class="divide-y divide-surface-container text-on-surface">
+              <% (customerEquipmentCards || []).forEach(card => { %>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-3 px-space-md font-medium"><%= card.customer %></td>
+                  <td class="py-3 px-space-md"><%= card.item %></td>
+                  <td class="py-3 px-space-md">
+                    <a href="javascript:void(0)" onclick="viewEquipmentCard('${card.serial}')" class="text-sky-600 font-mono font-medium hover:underline">
+                      <%= card.serial %>
+                    </a>
+                  </td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= card.model %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= card.brand %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= card.warrantyTo %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant font-mono"><%= card.contract %></td>
+                  <td class="py-3 px-space-md">
+                    <span class="inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800">
+                      <%= card.status %>
+                    </span>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: Add Equipment Card -->
+<div id="addCardModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <h3 class="font-headline-sm text-on-surface">Add Equipment Card</h3>
+      <button onclick="closeModal('addCardModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form onsubmit="handleAddCardSubmit(event)" class="p-space-lg space-y-space-md">
+      <div class="grid grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer *</label>
+          <input required name="customer" placeholder="e.g. Sathya Agencies" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Item Description *</label>
+          <input required name="item" placeholder="e.g. Samsung 55 Inch LED TV" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-3 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Serial Number *</label>
+          <input required name="serial" placeholder="SN-TV-10005" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none font-mono"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Model</label>
+          <input name="model" placeholder="UA55CU8000" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Brand</label>
+          <input name="brand" placeholder="Samsung" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Warranty To</label>
+          <input name="warrantyTo" type="date" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Contract No</label>
+          <input name="contract" placeholder="CNT-00005" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none font-mono"/>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-space-sm pt-space-xs border-t">
+        <button type="button" onclick="closeModal('addCardModal')" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface text-label-md">Cancel</button>
+        <button type="submit" class="px-space-md py-2 rounded-lg bg-sky-600 text-white text-label-md font-medium">Save Card</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+<script>
+  function filterEquipmentCards() {
+    const q = document.getElementById('eqSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#eqTableBody tr');
+    let visible = 0;
+    rows.forEach(r => {
+      const match = !q || r.innerText.toLowerCase().includes(q);
+      r.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+    document.getElementById('eqCardsCount').textContent = visible;
+  }
+
+  async function handleAddCardSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const payload = {
+      customer: formData.get('customer'),
+      item: formData.get('item'),
+      serial: formData.get('serial'),
+      model: formData.get('model'),
+      brand: formData.get('brand'),
+      warrantyTo: formData.get('warrantyTo') || '2027-12-31',
+      contract: formData.get('contract') || 'CNT-00010',
+      status: 'Active'
+    };
+
+    try {
+      const res = await fetch('/api/customer-equipment-cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Equipment card created!', 'success');
+        closeModal('addCardModal');
+        setTimeout(() => location.reload(), 400);
+      }
+    } catch (err) {
+      showToast('Error saving equipment card', 'error');
+    }
+  }
+</script>
+</body>
+</html>

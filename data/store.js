@@ -461,6 +461,237 @@ const store = {
     });
 
     return { results: results.slice(0, 10) };
+  },
+
+  // Sales Orders
+  getSalesOrders: (filters = {}) => {
+    const db = readDb();
+    let list = db.salesOrders || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(o => 
+        o.orderNo.toLowerCase().includes(q) ||
+        o.customerName.toLowerCase().includes(q) ||
+        o.mobile.includes(q) ||
+        o.customerCode.toLowerCase().includes(q)
+      );
+    }
+    if (filters.status && filters.status !== 'All Status') {
+      list = list.filter(o => o.status.toLowerCase() === filters.status.toLowerCase());
+    }
+    if (filters.store && filters.store !== 'All Stores') {
+      list = list.filter(o => o.store.toLowerCase().includes(filters.store.toLowerCase()));
+    }
+    return list;
+  },
+
+  addSalesOrder: (orderData) => {
+    const db = readDb();
+    if (!db.salesOrders) db.salesOrders = [];
+    const count = db.salesOrders.length + 46;
+    const orderNo = `SO-2026-${String(count).padStart(4, '0')}`;
+    const gross = parseFloat(orderData.grossTotal) || 0;
+    const tax = Math.round(gross * 0.12 * 100) / 100;
+    const docTotal = gross + tax;
+
+    const newOrder = {
+      orderNo,
+      date: orderData.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customerCode: orderData.customerCode || 'C' + (orderData.mobile || '9999999999'),
+      customerName: orderData.customerName || 'Walk-in Customer',
+      mobile: orderData.mobile || '-',
+      store: orderData.store || 'ARC1',
+      itemsCount: orderData.items ? orderData.items.length : 1,
+      deliveryDate: orderData.deliveryDate || new Date(Date.now() + 86400000 * 2).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      grossTotal: gross,
+      taxAmount: tax,
+      docTotal: docTotal,
+      status: orderData.status || 'Confirmed',
+      paymentStatus: orderData.paymentStatus || 'Paid',
+      items: orderData.items || [
+        { code: 'GEN-01', name: orderData.itemName || 'POS Retail Item', qty: 1, price: gross }
+      ]
+    };
+
+    db.salesOrders.unshift(newOrder);
+    writeDb(db);
+    return newOrder;
+  },
+
+  // Customer Equipment Cards
+  getCustomerEquipmentCards: (filters = {}) => {
+    const db = readDb();
+    let list = db.customerEquipmentCards || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(c => 
+        c.customer.toLowerCase().includes(q) ||
+        c.item.toLowerCase().includes(q) ||
+        c.serial.toLowerCase().includes(q) ||
+        c.brand.toLowerCase().includes(q) ||
+        c.model.toLowerCase().includes(q)
+      );
+    }
+    return list;
+  },
+
+  addCustomerEquipmentCard: (cardData) => {
+    const db = readDb();
+    if (!db.customerEquipmentCards) db.customerEquipmentCards = [];
+    const count = db.customerEquipmentCards.length + 10005;
+    const newCard = {
+      customer: cardData.customer,
+      item: cardData.item,
+      serial: cardData.serial || `SN-EQ-${count}`,
+      model: cardData.model || 'Standard',
+      brand: cardData.brand || 'Generic',
+      warrantyTo: cardData.warrantyTo || '2027-12-31',
+      contract: cardData.contract || `CNT-${count}`,
+      status: cardData.status || 'Active'
+    };
+    db.customerEquipmentCards.unshift(newCard);
+    writeDb(db);
+    return newCard;
+  },
+
+  // Finance Receipts
+  getFinanceReceipts: (filters = {}) => {
+    const db = readDb();
+    let list = db.financeReceipts || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(r => 
+        r.receiptNo.toLowerCase().includes(q) ||
+        r.customer.toLowerCase().includes(q) ||
+        r.mobile.includes(q) ||
+        r.financier.toLowerCase().includes(q) ||
+        r.doNumber.toLowerCase().includes(q)
+      );
+    }
+    if (filters.status && filters.status !== 'All Status' && filters.status !== 'all') {
+      list = list.filter(r => r.status.toLowerCase() === filters.status.toLowerCase());
+    }
+    return list;
+  },
+
+  addFinanceReceipt: (recData) => {
+    const db = readDb();
+    if (!db.financeReceipts) db.financeReceipts = [];
+    const count = db.financeReceipts.length + 4;
+    const receiptNo = `FR-2024-${String(count).padStart(5, '0')}`;
+    const loanAmt = parseFloat(recData.loanAmt) || 0;
+    const charges = parseFloat(recData.charges) || 0;
+    const total = loanAmt + charges;
+
+    const newRec = {
+      receiptNo,
+      date: recData.date || new Date().toISOString().split('T')[0],
+      customer: recData.customer,
+      mobile: recData.mobile || '-',
+      store: recData.store || 'STR001',
+      financier: recData.financier || 'HDFC Bank',
+      doNumber: recData.doNumber || `DO-${String(count).padStart(3, '0')}`,
+      loanAmt,
+      charges,
+      total,
+      sapNo: recData.sapNo || `SAP-FR-${String(count).padStart(3, '0')}`,
+      sapStatus: recData.sapStatus || 'PENDING',
+      status: recData.status || 'OPEN'
+    };
+    db.financeReceipts.unshift(newRec);
+    writeDb(db);
+    return newRec;
+  },
+
+  // Stock Inward
+  getStockInward: (filters = {}) => {
+    const db = readDb();
+    let list = db.stockInward || [];
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
+      list = list.filter(s => s.docNo.toLowerCase().includes(q) || s.supplier.toLowerCase().includes(q));
+    }
+    return list;
+  },
+
+  addStockInward: (inwardData) => {
+    const db = readDb();
+    if (!db.stockInward) db.stockInward = [];
+    const count = db.stockInward.length + 121;
+    const newInward = {
+      docNo: `INW-2026-${String(count).padStart(4, '0')}`,
+      date: inwardData.date || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      supplier: inwardData.supplier || 'Electronics Supplier',
+      store: inwardData.store || 'ARC1',
+      itemsCount: inwardData.itemsCount || 10,
+      docTotal: parseFloat(inwardData.docTotal) || 50000,
+      receivedBy: inwardData.receivedBy || 'Admin',
+      status: 'Received'
+    };
+    db.stockInward.unshift(newInward);
+    writeDb(db);
+    return newInward;
+  },
+
+  // Point of Sale Checkout (POS Sale)
+  recordPOSSale: (posData) => {
+    const db = readDb();
+    const subtotal = parseFloat(posData.subtotal) || 0;
+    const tax = parseFloat(posData.tax) || Math.round(subtotal * 0.12 * 100) / 100;
+    const discount = parseFloat(posData.discount) || 0;
+    const total = subtotal + tax - discount;
+
+    // 1. Create Sales Order
+    const count = (db.salesOrders ? db.salesOrders.length : 0) + 46;
+    const orderNo = `SO-2026-${String(count).padStart(4, '0')}`;
+    const order = {
+      orderNo,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customerCode: posData.customerCode || 'POS-WALKIN',
+      customerName: posData.customerName || 'Walk-in Retail Customer',
+      mobile: posData.mobile || '-',
+      store: posData.store || 'ARC1',
+      itemsCount: posData.items ? posData.items.length : 1,
+      deliveryDate: 'Immediate (POS Over Counter)',
+      grossTotal: subtotal,
+      taxAmount: tax,
+      docTotal: total,
+      status: 'Delivered',
+      paymentStatus: 'Paid',
+      items: posData.items || []
+    };
+    if (!db.salesOrders) db.salesOrders = [];
+    db.salesOrders.unshift(order);
+
+    // 2. Create Payment Receipt
+    const rcCount = db.receipts.length + 240264;
+    const receipt = {
+      docNo: String(rcCount),
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customer: posData.customerName || 'Walk-in Retail Customer',
+      mobile: posData.mobile || '-',
+      store: posData.store || 'ARC1',
+      amountPaid: total,
+      transType: 'Against Transaction',
+      status: 'OPEN',
+      paymentMethod: posData.paymentMethod || 'Cash',
+      refNo: `POS-${Math.floor(100000 + Math.random() * 900000)}`
+    };
+    db.receipts.unshift(receipt);
+
+    // 3. Deduct stock if item codes match
+    if (posData.items && Array.isArray(posData.items)) {
+      posData.items.forEach(cartItem => {
+        const item = db.items.find(i => i.code === cartItem.code);
+        if (item && item.onHand > 0) {
+          item.onHand = Math.max(0, item.onHand - (cartItem.qty || 1));
+          item.available = Math.max(0, item.onHand - item.reserved);
+        }
+      });
+    }
+
+    writeDb(db);
+    return { order, receipt };
   }
 };
 

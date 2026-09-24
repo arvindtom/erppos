@@ -1,59 +1,98 @@
 <aside class="fixed left-0 top-0 h-full w-64 bg-primary text-on-primary z-50 flex flex-col pt-space-md pb-space-lg select-none">
   <!-- Brand / Logo -->
-  <div class="px-space-md mb-space-lg flex items-center gap-space-sm cursor-pointer" onclick="window.location.href='/dashboard'">
+  <div class="px-space-md mb-space-md flex items-center gap-space-sm cursor-pointer" onclick="window.location.href='/dashboard'">
     <div class="w-8 h-8 rounded bg-secondary flex items-center justify-center shadow-md">
       <span class="material-symbols-outlined text-on-secondary text-[20px]">hub</span>
     </div>
     <div class="flex flex-col">
       <span class="font-headline-md text-on-primary tracking-tight leading-tight">Enterprise ERP</span>
-      <span class="text-[10px] text-on-primary-container tracking-wider uppercase font-semibold">Point of Sale</span>
+      <span class="text-[10px] text-on-primary-container tracking-wider uppercase font-semibold">Sales • Service • Stock • POS</span>
     </div>
   </div>
 
-  <!-- Navigation Links -->
-  <nav class="flex-1 px-space-xs space-y-space-xs overflow-y-auto">
+  <!-- Quick POS Launch Button -->
+  <div class="px-space-md mb-space-sm">
+    <a href="/pos" class="flex items-center justify-center gap-2 w-full py-2 px-3 rounded-lg bg-secondary text-on-secondary font-headline-sm text-xs shadow-md hover:opacity-90 active:scale-95 transition-all">
+      <span class="material-symbols-outlined text-[16px]">point_of_sale</span>
+      Open POS Terminal
+    </a>
+  </div>
+
+  <!-- Navigation Links Grouped by Pillars -->
+  <nav class="flex-1 px-space-xs space-y-1 overflow-y-auto">
     <% 
-      const navItems = [
-        { path: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
-        { path: 'sales-orders', label: 'Sales Orders', icon: 'shopping_cart' },
-        { path: 'sales-invoices', label: 'Sales Invoices', icon: 'receipt_long' },
-        { path: 'sales-returns', label: 'Sales Returns', icon: 'assignment_return' },
-        { path: 'payment-receipts', label: 'Payment Receipts', icon: 'payments' },
-        { path: 'sales-invoice-reprint', label: 'Sales Invoice Reprint', icon: 'print' },
-        { path: 'customers', label: 'Customers', icon: 'group' },
-        { path: 'customer-equipment-cards', label: 'Customer Equipment Cards', icon: 'badge' },
-        { path: 'service-dashboard', label: 'Service Dashboard', icon: 'support_agent' },
-        { path: 'service-calls', label: 'Service Calls', icon: 'phone_in_talk' },
-        { path: 'technician-assignment', label: 'Technician Assignment', icon: 'engineering' },
-        { path: 'service-contracts', label: 'Service Contracts', icon: 'description' },
-        { path: 'stock-requests', label: 'Stock Requests', icon: 'inventory_2' },
-        { path: 'stock-inward', label: 'Stock Inward', icon: 'input' },
-        { path: 'check-item-price-and-stock', label: 'Check Item Price & Stock', icon: 'fact_check' },
-        { path: 'finance-receipts', label: 'Finance Receipts', icon: 'account_balance' },
-        { path: 'accounts', label: 'Accounts', icon: 'book' },
-        { path: 'control-center', label: 'Control Center', icon: 'tune' },
-        { path: 'reports', label: 'Reports', icon: 'bar_chart' }
+      const sections = [
+        {
+          title: "OVERVIEW",
+          items: [
+            { path: 'dashboard', label: 'Dashboard', icon: 'dashboard' },
+            { path: 'pos', label: 'Point of Sale (POS)', icon: 'point_of_sale' }
+          ]
+        },
+        {
+          title: "SALES",
+          items: [
+            { path: 'sales-orders', label: 'Sales Orders', icon: 'shopping_cart' },
+            { path: 'sales-invoices', label: 'Sales Invoices', icon: 'receipt_long' },
+            { path: 'sales-returns', label: 'Sales Returns', icon: 'assignment_return' },
+            { path: 'payment-receipts', label: 'Payment Receipts', icon: 'payments' },
+            { path: 'sales-invoice-reprint', label: 'Sales Invoice Reprint', icon: 'print' }
+          ]
+        },
+        {
+          title: "SERVICE",
+          items: [
+            { path: 'service-dashboard', label: 'Service Dashboard', icon: 'support_agent' },
+            { path: 'service-calls', label: 'Service Calls', icon: 'phone_in_talk' },
+            { path: 'technician-assignment', label: 'Technician Assignment', icon: 'engineering' },
+            { path: 'customer-equipment-cards', label: 'Customer Equipment Cards', icon: 'badge' },
+            { path: 'service-contracts', label: 'Service Contracts', icon: 'description' }
+          ]
+        },
+        {
+          title: "INVENTORY",
+          items: [
+            { path: 'stock-requests', label: 'Stock Requests', icon: 'inventory_2' },
+            { path: 'stock-inward', label: 'Stock Inward', icon: 'input' },
+            { path: 'check-item-price-and-stock', label: 'Check Item Price & Stock', icon: 'fact_check' }
+          ]
+        },
+        {
+          title: "FINANCE & MANAGEMENT",
+          items: [
+            { path: 'customers', label: 'Customers', icon: 'group' },
+            { path: 'finance-receipts', label: 'Finance Receipts', icon: 'account_balance' },
+            { path: 'accounts', label: 'Accounts', icon: 'book' },
+            { path: 'control-center', label: 'Control Center', icon: 'tune' },
+            { path: 'reports', label: 'Reports', icon: 'bar_chart' }
+          ]
+        }
       ];
     %>
 
-    <% navItems.forEach(item => { 
-        const isActive = currentPath === item.path;
-    %>
-      <a 
-        href="/<%= item.path %>" 
-        data-path="<%= item.path %>"
-        class="flex items-center gap-2.5 px-space-md py-space-sm rounded-lg transition-all <%= isActive ? 'bg-primary-container text-on-primary-container font-headline-sm' : 'text-inverse-primary hover:bg-primary-container hover:text-on-primary' %>"
-        <%= isActive ? 'aria-current="page"' : '' %>
-      >
-        <span class="material-symbols-outlined text-[18px] opacity-80"><%= item.icon %></span>
-        <span class="truncate"><%= item.label %></span>
-      </a>
+    <% sections.forEach(section => { %>
+      <div class="pt-2 pb-1 px-3">
+        <span class="text-[10px] font-bold text-on-primary-container tracking-wider uppercase opacity-70"><%= section.title %></span>
+      </div>
+      <% section.items.forEach(item => { 
+          const isActive = currentPath === item.path;
+      %>
+        <a 
+          href="/<%= item.path %>" 
+          data-path="<%= item.path %>"
+          class="flex items-center gap-2.5 px-space-md py-1.5 rounded-lg transition-all text-xs <%= isActive ? 'bg-primary-container text-on-primary-container font-headline-sm shadow-sm' : 'text-inverse-primary hover:bg-primary-container hover:text-on-primary' %>"
+          <%= isActive ? 'aria-current="page"' : '' %>
+        >
+          <span class="material-symbols-outlined text-[16px] opacity-80"><%= item.icon %></span>
+          <span class="truncate"><%= item.label %></span>
+        </a>
+      <% }); %>
     <% }); %>
   </nav>
 
   <!-- Sidebar Footer -->
-  <div class="px-space-md pt-space-sm border-t border-primary-container/40 text-xs text-on-primary-container flex items-center justify-between">
-    <span>ARC1 Store - v2.4</span>
-    <span class="w-2 h-2 rounded-full bg-emerald-400" title="Connected"></span>
+  <div class="px-space-md pt-space-xs border-t border-primary-container/40 text-[11px] text-on-primary-container flex items-center justify-between">
+    <span>ARC1 Retail • Active</span>
+    <span class="w-2 h-2 rounded-full bg-emerald-400" title="Online"></span>
   </div>
 </aside>

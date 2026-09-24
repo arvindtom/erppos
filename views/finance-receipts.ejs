@@ -1,0 +1,215 @@
+<%- include('partials/head', { pageTitle: 'Finance Receipts - ERPPOS' }) %>
+
+<%- include('partials/sidebar') %>
+
+<div class="pl-64 min-h-screen flex flex-col">
+  <%- include('partials/header') %>
+
+  <main class="relative pt-16 bg-surface p-space-lg flex-1">
+    <div class="flex flex-col w-full">
+
+      <!-- Top Title & Action Header (Matching Screenshot) -->
+      <div class="flex items-center justify-between mb-space-md bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/20 shadow-sm">
+        <h1 class="font-headline-md text-on-surface">Finance Receipts</h1>
+        <button onclick="openModal('newFinanceModal')" class="flex items-center gap-1.5 bg-sky-500 hover:bg-sky-600 text-white px-4 py-2 rounded-lg text-label-md font-semibold transition-all shadow-sm">
+          <span class="material-symbols-outlined text-[18px]">add</span>
+          New Finance Receipt
+        </button>
+      </div>
+
+      <!-- Search & Status Filter Bar (Matching Screenshot) -->
+      <div class="bg-surface-container-lowest p-space-sm rounded-xl shadow-sm mb-space-md flex items-center justify-between gap-space-md border border-outline-variant/20">
+        <div class="flex items-center flex-1 bg-surface-container-low rounded-lg px-space-md py-1.5 border border-outline-variant/20">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">search</span>
+          <input 
+            id="frSearchInput" 
+            oninput="filterFinanceTable()" 
+            class="bg-transparent border-none outline-none w-full text-body-md text-on-surface placeholder:text-on-surface-variant" 
+            placeholder="Search by Receipt No, Customer, Mobile..." 
+            type="text"
+          />
+        </div>
+
+        <div class="flex items-center bg-surface-container-low px-space-md py-1.5 rounded-lg text-body-md text-on-surface border border-outline-variant/20">
+          <span class="material-symbols-outlined text-on-surface-variant text-[18px] mr-2">filter_list</span>
+          <select id="frStatusFilter" onchange="filterFinanceTable()" class="bg-transparent border-none outline-none text-body-md text-on-surface cursor-pointer">
+            <option value="All Status">All Status</option>
+            <option value="CONFIRMED">CONFIRMED</option>
+            <option value="OPEN">OPEN</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Data Table (Matching Screenshot Columns & Badges) -->
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden border border-outline-variant/20">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-body-sm">
+            <thead>
+              <tr class="bg-surface-container-low text-on-surface-variant text-label-sm font-semibold border-b border-surface-container">
+                <th class="py-3 px-space-md">RECEIPT NO.</th>
+                <th class="py-3 px-space-md">DATE</th>
+                <th class="py-3 px-space-md">CUSTOMER</th>
+                <th class="py-3 px-space-md">MOBILE</th>
+                <th class="py-3 px-space-md">STORE</th>
+                <th class="py-3 px-space-md">FINANCIER</th>
+                <th class="py-3 px-space-md">DO NUMBER</th>
+                <th class="py-3 px-space-md text-right">LOAN AMT</th>
+                <th class="py-3 px-space-md text-right">CHARGES</th>
+                <th class="py-3 px-space-md text-right">TOTAL</th>
+                <th class="py-3 px-space-md">SAP NO.</th>
+                <th class="py-3 px-space-md text-center">SAP STATUS</th>
+                <th class="py-3 px-space-md text-center">STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="frTableBody" class="divide-y divide-surface-container text-on-surface">
+              <% (financeReceipts || []).forEach(fr => { 
+                  const isConfirmed = fr.status === 'CONFIRMED';
+                  const isSynced = fr.sapStatus === 'SYNCED';
+              %>
+                <tr class="hover:bg-surface-container-low transition-colors">
+                  <td class="py-3 px-space-md">
+                    <a href="javascript:void(0)" class="text-sky-600 font-mono font-medium hover:underline">
+                      <%= fr.receiptNo %>
+                    </a>
+                  </td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= fr.date %></td>
+                  <td class="py-3 px-space-md font-medium"><%= fr.customer %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= fr.mobile %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant font-mono"><%= fr.store %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant"><%= fr.financier %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant font-mono"><%= fr.doNumber %></td>
+                  <td class="py-3 px-space-md text-right font-mono font-medium">₹<%= Number(fr.loanAmt).toLocaleString('en-IN') %></td>
+                  <td class="py-3 px-space-md text-right font-mono font-medium">₹<%= Number(fr.charges).toLocaleString('en-IN') %></td>
+                  <td class="py-3 px-space-md text-right font-mono font-semibold">₹<%= Number(fr.total).toLocaleString('en-IN') %></td>
+                  <td class="py-3 px-space-md text-on-surface-variant font-mono"><%= fr.sapNo %></td>
+                  <td class="py-3 px-space-md text-center">
+                    <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold <%= isSynced ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                      <%= fr.sapStatus %>
+                    </span>
+                  </td>
+                  <td class="py-3 px-space-md text-center">
+                    <span class="inline-block px-2 py-0.5 rounded text-[11px] font-semibold <%= isConfirmed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800' %>">
+                      <%= fr.status %>
+                    </span>
+                  </td>
+                </tr>
+              <% }); %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Modal: New Finance Receipt -->
+<div id="newFinanceModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-outline-variant/30">
+    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
+      <h3 class="font-headline-sm text-on-surface">New Finance Receipt</h3>
+      <button onclick="closeModal('newFinanceModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+
+    <form onsubmit="handleNewFinanceSubmit(event)" class="p-space-lg space-y-space-md">
+      <div class="grid grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Customer *</label>
+          <input required name="customer" placeholder="e.g. Rajesh Kumar" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Mobile *</label>
+          <input required name="mobile" placeholder="e.g. 9876543210" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Financier</label>
+          <select name="financier" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none">
+            <option value="HDFC Bank">HDFC Bank</option>
+            <option value="Bajaj Finance">Bajaj Finance</option>
+            <option value="TVS Credit">TVS Credit</option>
+            <option value="Kotak Mahindra">Kotak Mahindra</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">DO Number</label>
+          <input name="doNumber" placeholder="DO-005" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none font-mono"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-space-sm">
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Loan Amount (₹) *</label>
+          <input required type="number" step="0.01" name="loanAmt" placeholder="50000" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none font-mono"/>
+        </div>
+        <div>
+          <label class="text-label-sm text-on-surface-variant block mb-1">Processing Charges (₹)</label>
+          <input type="number" step="0.01" name="charges" placeholder="500" class="w-full bg-surface-container text-on-surface px-3 py-2 rounded-lg text-body-md border border-outline-variant/30 outline-none font-mono"/>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-space-sm pt-space-xs border-t">
+        <button type="button" onclick="closeModal('newFinanceModal')" class="px-space-md py-2 rounded-lg bg-surface-container text-on-surface text-label-md">Cancel</button>
+        <button type="submit" class="px-space-md py-2 rounded-lg bg-sky-500 text-white text-label-md font-medium">Record Receipt</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/modals') %>
+
+<script src="/js/common.js"></script>
+<script>
+  function filterFinanceTable() {
+    const q = document.getElementById('frSearchInput').value.toLowerCase();
+    const status = document.getElementById('frStatusFilter').value.toLowerCase();
+    const rows = document.querySelectorAll('#frTableBody tr');
+
+    rows.forEach(r => {
+      const text = r.innerText.toLowerCase();
+      const statusText = r.cells[12] ? r.cells[12].innerText.trim().toLowerCase() : '';
+      const matchQ = !q || text.includes(q);
+      const matchStatus = status === 'all status' || statusText === status;
+      r.style.display = (matchQ && matchStatus) ? '' : 'none';
+    });
+  }
+
+  async function handleNewFinanceSubmit(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    const payload = {
+      customer: formData.get('customer'),
+      mobile: formData.get('mobile'),
+      financier: formData.get('financier'),
+      doNumber: formData.get('doNumber'),
+      loanAmt: formData.get('loanAmt'),
+      charges: formData.get('charges') || 0,
+      store: 'STR001',
+      status: 'CONFIRMED',
+      sapStatus: 'SYNCED'
+    };
+
+    try {
+      const res = await fetch('/api/finance-receipts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        showToast('Finance receipt created!', 'success');
+        closeModal('newFinanceModal');
+        setTimeout(() => location.reload(), 400);
+      }
+    } catch (err) {
+      showToast('Error saving receipt', 'error');
+    }
+  }
+</script>
+</body>
+</html>

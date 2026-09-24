@@ -197,4 +197,74 @@ router.get('/search', (req, res) => {
   res.json(results);
 });
 
+// Sales Orders
+router.get('/sales-orders', (req, res) => {
+  const list = store.getSalesOrders(req.query);
+  res.json(list);
+});
+
+router.post('/sales-orders', (req, res) => {
+  try {
+    const newOrder = store.addSalesOrder(req.body);
+    res.status(201).json({ success: true, data: newOrder });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// Customer Equipment Cards
+router.get('/customer-equipment-cards', (req, res) => {
+  const list = store.getCustomerEquipmentCards(req.query);
+  res.json(list);
+});
+
+router.post('/customer-equipment-cards', (req, res) => {
+  try {
+    const card = store.addCustomerEquipmentCard(req.body);
+    res.status(201).json({ success: true, data: card });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// Finance Receipts
+router.get('/finance-receipts', (req, res) => {
+  const list = store.getFinanceReceipts(req.query);
+  res.json(list);
+});
+
+router.post('/finance-receipts', (req, res) => {
+  try {
+    const rec = store.addFinanceReceipt(req.body);
+    res.status(201).json({ success: true, data: rec });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// Stock Inward
+router.get('/stock-inward', (req, res) => {
+  const list = store.getStockInward(req.query);
+  res.json(list);
+});
+
+router.post('/stock-inward', (req, res) => {
+  try {
+    const inward = store.addStockInward(req.body);
+    res.status(201).json({ success: true, data: inward });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
+// Point of Sale Checkout
+router.post('/pos/checkout', (req, res) => {
+  try {
+    const result = store.recordPOSSale(req.body);
+    res.status(201).json({ success: true, data: result });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

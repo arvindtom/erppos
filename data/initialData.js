@@ -756,6 +756,213 @@ const initialData = {
       paymentMethod: "Cash",
       refNo: "CASH-1092"
     }
+  ],
+
+  salesOrders: [
+    {
+      orderNo: "SO-2026-0045",
+      date: "24 Sep 2026",
+      customerCode: "9787",
+      customerName: "JEYAPANDI",
+      mobile: "9500716518",
+      store: "ARC1",
+      itemsCount: 1,
+      deliveryDate: "26 Sep 2026",
+      grossTotal: 129999.00,
+      taxAmount: 15599.88,
+      docTotal: 145598.88,
+      status: "Confirmed",
+      paymentStatus: "Paid",
+      items: [
+        { code: "SAM-S24U-256", name: "Samsung Galaxy S24 Ultra 256GB Titanium Gray", qty: 1, price: 129999.00 }
+      ]
+    },
+    {
+      orderNo: "SO-2026-0044",
+      date: "23 Sep 2026",
+      customerCode: "C9876543210",
+      customerName: "Sathya Agencies",
+      mobile: "9876543210",
+      store: "ARC1",
+      itemsCount: 2,
+      deliveryDate: "25 Sep 2026",
+      grossTotal: 89980.00,
+      taxAmount: 10797.60,
+      docTotal: 100777.60,
+      status: "Pending",
+      paymentStatus: "Pending",
+      items: [
+        { code: "LG-AC-15T-INV", name: "LG 1.5 Ton 5 Star AI DUAL Inverter Split AC", qty: 2, price: 44990.00 }
+      ]
+    },
+    {
+      orderNo: "SO-2026-0043",
+      date: "22 Sep 2026",
+      customerCode: "C9843266565",
+      customerName: "Mahadev Electricals",
+      mobile: "9843266565",
+      store: "ARC2",
+      itemsCount: 100,
+      deliveryDate: "24 Sep 2026",
+      grossTotal: 45000.00,
+      taxAmount: 5400.00,
+      docTotal: 50400.00,
+      status: "Delivered",
+      paymentStatus: "Paid",
+      items: [
+        { code: "SP-CAP-45UF", name: "Heavy Duty 45uF Motor Run Capacitor 450V", qty: 100, price: 450.00 }
+      ]
+    },
+    {
+      orderNo: "SO-2026-0042",
+      date: "21 Sep 2026",
+      customerCode: "C6789753456",
+      customerName: "Bharat Electronics",
+      mobile: "6789753456",
+      store: "ARC1",
+      itemsCount: 1,
+      deliveryDate: "23 Sep 2026",
+      grossTotal: 26990.00,
+      taxAmount: 3238.80,
+      docTotal: 30228.80,
+      status: "Confirmed",
+      paymentStatus: "Paid",
+      items: [
+        { code: "SNY-SB-HTS40R", name: "Sony HT-S40R 5.1ch Real Surround Soundbar", qty: 1, price: 26990.00 }
+      ]
+    },
+    {
+      orderNo: "SO-2026-0041",
+      date: "20 Sep 2026",
+      customerCode: "C8015073309",
+      customerName: "MANI THANJAVUR",
+      mobile: "8015073303",
+      store: "ARC1",
+      itemsCount: 1,
+      deliveryDate: "22 Sep 2026",
+      grossTotal: 134900.00,
+      taxAmount: 16188.00,
+      docTotal: 151088.00,
+      status: "Delivered",
+      paymentStatus: "Paid",
+      items: [
+        { code: "APL-IP15P-128", name: "Apple iPhone 15 Pro 128GB Natural Titanium", qty: 1, price: 134900.00 }
+      ]
+    }
+  ],
+
+  customerEquipmentCards: [
+    {
+      customer: "Sathya Agencies",
+      item: "Samsung 55 Inch LED TV",
+      serial: "SN-TV-10001",
+      model: "UA55CU8000",
+      brand: "Samsung",
+      warrantyTo: "2027-01-09",
+      contract: "CNT-00001",
+      status: "Active"
+    },
+    {
+      customer: "Magic Mobiles",
+      item: "LG Refrigerator",
+      serial: "SN-RF-20002",
+      model: "GL-T292",
+      brand: "LG",
+      warrantyTo: "2026-08-11",
+      contract: "CNT-00002",
+      status: "Active"
+    },
+    {
+      customer: "Bharat Electronics",
+      item: "Sony Soundbar",
+      serial: "SN-SB-30003",
+      model: "HT-S40R",
+      brand: "Sony",
+      warrantyTo: "2026-12-15",
+      contract: "CNT-00003",
+      status: "Active"
+    },
+    {
+      customer: "JEYAPANDI",
+      item: "Whirlpool Double Door Refrigerator",
+      serial: "SN-WP-40004",
+      model: "IF-INV-265",
+      brand: "Whirlpool",
+      warrantyTo: "2028-03-20",
+      contract: "CNT-00004",
+      status: "Active"
+    }
+  ],
+
+  financeReceipts: [
+    {
+      receiptNo: "FR-2024-00001",
+      date: "2024-01-20",
+      customer: "Rajesh Kumar",
+      mobile: "9876543210",
+      store: "STR001",
+      financier: "HDFC Bank",
+      doNumber: "DO-001",
+      loanAmt: 40000,
+      charges: 500,
+      total: 40500,
+      sapNo: "SAP-FR-001",
+      sapStatus: "SYNCED",
+      status: "CONFIRMED"
+    },
+    {
+      receiptNo: "FR-2024-00002",
+      date: "2024-01-22",
+      customer: "Amit Patel",
+      mobile: "9876543212",
+      store: "STR002",
+      financier: "Bajaj Finance",
+      doNumber: "DO-002",
+      loanAmt: 75000,
+      charges: 800,
+      total: 75800,
+      sapNo: "-",
+      sapStatus: "PENDING",
+      status: "OPEN"
+    },
+    {
+      receiptNo: "FR-2024-00003",
+      date: "2024-02-15",
+      customer: "JEYAPANDI",
+      mobile: "9500716518",
+      store: "STR001",
+      financier: "TVS Credit",
+      doNumber: "DO-003",
+      loanAmt: 35000,
+      charges: 450,
+      total: 35450,
+      sapNo: "SAP-FR-003",
+      sapStatus: "SYNCED",
+      status: "CONFIRMED"
+    }
+  ],
+
+  stockInward: [
+    {
+      docNo: "INW-2026-0120",
+      date: "24 Sep 2026",
+      supplier: "Samsung India Electronics Pvt Ltd",
+      store: "ARC1",
+      itemsCount: 45,
+      docTotal: 450000.00,
+      receivedBy: "Mahesh",
+      status: "Received"
+    },
+    {
+      docNo: "INW-2026-0119",
+      date: "21 Sep 2026",
+      supplier: "LG Electronics India Ltd",
+      store: "ARC2",
+      itemsCount: 30,
+      docTotal: 320000.00,
+      receivedBy: "Ramesh",
+      status: "Received"
+    }
   ]
 };
 
