@@ -919,19 +919,48 @@ const store = {
     };
     db.receipts.unshift(receipt);
 
-    // 3. Deduct stock if item codes match
+    // 3. Create Sales Invoice
+    if (!db.salesInvoices) db.salesInvoices = [];
+    const invCount = db.salesInvoices.length + 113;
+    const invoiceNo = `260200${invCount}`;
+    const invoice = {
+      invoiceNo,
+      date: new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+      customerCode: order.customerCode,
+      name: order.customerName,
+      mobile: order.mobile,
+      store: order.store || 'ARC1',
+      salesPerson: 'Admin',
+      notes: `[POS Billed - ${posData.items ? posData.items.map(i => `${i.name} (x${i.qty})`).join(', ') : 'Direct'}]`,
+      invoiceValue: total,
+      invoiceStatus: 'OPEN',
+      approved: '-'
+    };
+    db.salesInvoices.unshift(invoice);
+
+    // 4. Add to Sales Invoice Reprint
+    if (!db.salesInvoiceReprint) db.salesInvoiceReprint = [];
+    db.salesInvoiceReprint.unshift({
+      invoiceNo,
+      date: invoice.date,
+      customer: invoice.name,
+      amount: total,
+      printCount: 1
+    });
+
+    // 5. Deduct stock if item codes match
     if (posData.items && Array.isArray(posData.items)) {
       posData.items.forEach(cartItem => {
         const item = db.items.find(i => i.code === cartItem.code);
         if (item && item.onHand > 0) {
           item.onHand = Math.max(0, item.onHand - (cartItem.qty || 1));
-          item.available = Math.max(0, item.onHand - item.reserved);
+          item.available = Math.max(0, item.onHand - (item.reserved || 0));
         }
       });
     }
 
     writeDb(db);
-    return { order, receipt };
+    return { order, receipt, invoice };
   }
 };
 

@@ -152,9 +152,11 @@ app.get('/service-calls', (req, res) => {
 
 app.get('/sales-invoices', (req, res) => {
   const salesInvoices = store.getSalesInvoices();
+  const items = store.getItems();
   res.render('sales-invoices', {
     ...getCommonData('sales-invoices', 'Sales Invoices'),
-    salesInvoices
+    salesInvoices,
+    items
   });
 });
 

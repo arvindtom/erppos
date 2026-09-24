@@ -1,83 +1,98 @@
-<%- include('partials/head', { pageTitle: 'Point of Sale (POS) Terminal - ERPPOS' }) %>
+<%- include('partials/head', { pageTitle: 'Point of Sale (POS) Terminal - Enterprise ERP and POS' }) %>
 
 <%- include('partials/sidebar') %>
 
-<div class="pl-64 min-h-screen flex flex-col bg-surface">
+<div class="pl-64 min-h-screen flex flex-col bg-slate-50">
   <%- include('partials/header') %>
 
-  <main class="relative pt-28 p-space-md flex-1 flex flex-col">
+  <main class="relative pt-28 p-4 flex-1 flex flex-col">
     <!-- POS Terminal Top Status Bar -->
-    <div class="flex items-center justify-between bg-surface-container-low px-space-md py-2 rounded-xl mb-3 border border-outline-variant/20 shadow-sm">
+    <div class="flex items-center justify-between bg-white px-4 py-2.5 rounded-xl mb-3 border border-slate-200/80 shadow-xs">
       <div class="flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
+        <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
         <div class="flex items-center gap-2">
-          <span class="font-headline-sm text-sm text-on-surface">POS Terminal #01</span>
-          <span class="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-semibold">ONLINE</span>
+          <span class="font-bold text-xs text-slate-800 tracking-tight">Enterprise ERP & POS Terminal #01</span>
+          <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded font-bold uppercase">Online Billing Counter</span>
         </div>
-        <span class="text-xs text-on-surface-variant hidden sm:inline">Store: <strong>ARC1 Retail</strong></span>
+        <span class="text-xs text-slate-500 hidden sm:inline">• Store: <strong class="text-slate-700">ARC1 Retail</strong></span>
       </div>
 
       <div class="flex items-center gap-2">
-        <button onclick="clearCart()" class="text-xs px-2.5 py-1.5 rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high transition-colors flex items-center gap-1">
-          <span class="material-symbols-outlined text-[15px]">delete_sweep</span> Clear Cart
+        <button onclick="openCustomItemModal()" class="text-xs px-2.5 py-1.5 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 transition-colors flex items-center gap-1 font-semibold border border-sky-200">
+          <span class="material-symbols-outlined text-[15px]">add_circle</span> Add Custom Charge
         </button>
-        <a href="/dashboard" class="text-xs px-2.5 py-1.5 rounded-lg bg-secondary text-on-secondary hover:opacity-90 transition-opacity flex items-center gap-1 font-medium">
+        <button onclick="clearCart()" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors flex items-center gap-1">
+          <span class="material-symbols-outlined text-[15px]">delete_sweep</span> Clear Bill
+        </button>
+        <a href="/dashboard" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 text-white hover:bg-slate-900 transition-colors flex items-center gap-1 font-medium">
           <span class="material-symbols-outlined text-[15px]">dashboard</span> Dashboard
         </a>
       </div>
     </div>
 
     <!-- POS Main Split Workspace -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-space-md flex-1">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1">
 
-      <!-- LEFT: Product Catalog & Category Selection (7 Cols) -->
+      <!-- LEFT: Product Catalog & Item Selector (7 Cols) -->
       <div class="lg:col-span-7 flex flex-col space-y-3">
         
         <!-- Search & Barcode input -->
-        <div class="flex items-center gap-2 bg-surface-container-lowest p-2 rounded-xl border border-outline-variant/30 shadow-sm">
-          <span class="material-symbols-outlined text-secondary text-[20px] ml-1">barcode_scanner</span>
+        <div class="flex items-center gap-2 bg-white p-2.5 rounded-xl border border-slate-200 shadow-xs focus-within:border-sky-500 transition-all">
+          <span class="material-symbols-outlined text-sky-600 text-[20px] ml-1">barcode_scanner</span>
           <input 
             id="posItemSearch" 
-            class="w-full bg-transparent outline-none text-body-md text-on-surface placeholder:text-on-surface-variant" 
-            placeholder="Scan barcode or type item name, brand, code..." 
+            class="w-full bg-transparent outline-none text-xs text-slate-800 placeholder:text-slate-400" 
+            placeholder="Scan barcode or type item name, brand, code... (Press Enter to bill first match)" 
             type="text"
             oninput="filterPOSCatalog()"
+            onkeydown="handleSearchKey(event)"
           />
         </div>
 
         <!-- Category Filter Pills -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs select-none" id="categoryPills">
-          <button onclick="selectCategory('All')" class="cat-pill active px-3 py-1.5 rounded-lg bg-secondary text-on-secondary font-semibold transition-all">All</button>
-          <button onclick="selectCategory('Smartphones')" class="cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all">Smartphones</button>
-          <button onclick="selectCategory('Air Conditioners')" class="cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all">AC & Cooling</button>
-          <button onclick="selectCategory('Audio')" class="cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all">Audio</button>
-          <button onclick="selectCategory('General Accessories')" class="cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all">Accessories</button>
-          <button onclick="selectCategory('Spare Parts')" class="cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all">Spare Parts</button>
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs select-none no-scrollbar" id="categoryPills">
+          <button onclick="selectCategory('All')" class="cat-pill active px-3 py-1.5 rounded-lg bg-[#0284c7] text-white font-semibold shadow-xs transition-all">All</button>
+          <button onclick="selectCategory('Smartphones')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Smartphones</button>
+          <button onclick="selectCategory('Electronics')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Electronics & TVs</button>
+          <button onclick="selectCategory('Appliances')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Appliances</button>
+          <button onclick="selectCategory('Audio')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Audio</button>
+          <button onclick="selectCategory('Accessories')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Accessories</button>
+          <button onclick="selectCategory('Spares')" class="cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all">Spare Parts</button>
         </div>
 
-        <!-- Product Cards Grid -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 overflow-y-auto max-h-[calc(100vh-250px)] pr-1" id="posCatalogGrid">
+        <!-- Product Cards Grid: Click item to be billed! -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 overflow-y-auto max-h-[calc(100vh-270px)] pr-1" id="posCatalogGrid">
           <% (items || []).forEach(item => { 
-              if (item.name === '-' || !item.name) return;
+              if (!item || !item.name || item.name === '-') return;
+              const itemPrice = Number(item.sellingPrice || item.price || item.mrp || 0);
               const isAvailable = Number(item.available) > 0;
           %>
             <div 
-              onclick="addToCart('<%= item.code %>', '<%= item.name.replace(/'/g, '') %>', <%= item.price %>, <%= item.available %>)"
-              class="pos-card bg-surface-container-lowest p-3 rounded-xl border border-outline-variant/20 hover:border-secondary/50 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between select-none relative group"
+              onclick="addToCart('<%= item.code %>', '<%= item.name.replace(/'/g, "\\'") %>', <%= itemPrice %>, <%= item.available %>)"
+              class="pos-card bg-white p-3.5 rounded-xl border border-slate-200 hover:border-sky-500 hover:shadow-md cursor-pointer transition-all flex flex-col justify-between select-none relative group"
               data-name="<%= item.name.toLowerCase() %>"
               data-brand="<%= (item.brand || '').toLowerCase() %>"
               data-code="<%= (item.code || '').toLowerCase() %>"
-              data-category="<%= item.category %>"
+              data-category="<%= item.category || 'General' %>"
+              data-price="<%= itemPrice %>"
             >
               <div>
-                <span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider block truncate"><%= item.brand %></span>
-                <h4 class="font-headline-sm text-xs text-on-surface line-clamp-2 mt-0.5 leading-snug"><%= item.name %></h4>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 font-semibold mb-1">
+                  <span class="uppercase tracking-wider block truncate text-slate-500"><%= item.brand || 'Item' %></span>
+                  <span class="font-mono text-[9px] bg-slate-100 text-slate-600 px-1 py-0.5 rounded">#<%= item.code %></span>
+                </div>
+                <h4 class="text-xs font-semibold text-slate-800 line-clamp-2 leading-snug"><%= item.name %></h4>
               </div>
 
-              <div class="mt-3 pt-2 border-t border-surface-container flex items-center justify-between">
-                <span class="font-headline-sm text-sm text-secondary font-mono">₹<%= Number(item.price).toLocaleString('en-IN') %></span>
-                <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <%= isAvailable ? 'bg-secondary-fixed text-on-secondary-fixed' : 'bg-error-container text-on-error-container' %>">
-                  <%= item.available %> in stock
+              <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between">
+                <div>
+                  <span class="text-sm font-bold text-sky-600 font-mono">₹<%= itemPrice.toLocaleString('en-IN') %></span>
+                  <% if (item.mrp && Number(item.mrp) > itemPrice) { %>
+                    <span class="text-[10px] text-slate-400 line-through ml-1 font-mono">₹<%= Number(item.mrp).toLocaleString('en-IN') %></span>
+                  <% } %>
+                </div>
+                <span class="text-[10px] px-1.5 py-0.5 rounded font-bold <%= isAvailable ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-700 border border-red-200' %>">
+                  <%= item.available %> left
                 </span>
               </div>
             </div>
@@ -86,86 +101,91 @@
 
       </div>
 
-      <!-- RIGHT: Current Register Cart & Checkout (5 Cols) -->
-      <div class="lg:col-span-5 bg-surface-container-lowest p-space-md rounded-2xl border border-outline-variant/30 shadow-md flex flex-col justify-between">
+      <!-- RIGHT: Current Bill Cart & Checkout (5 Cols) -->
+      <div class="lg:col-span-5 bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
         
         <!-- Cart Header & Customer Selector -->
         <div>
-          <div class="flex items-center justify-between pb-2 border-b border-surface-container mb-3">
-            <h3 class="font-headline-sm text-on-surface flex items-center gap-1.5">
-              <span class="material-symbols-outlined text-secondary text-[20px]">receipt_long</span>
-              Current Sale
+          <div class="flex items-center justify-between pb-3 border-b border-slate-200 mb-3">
+            <h3 class="text-sm font-bold text-slate-800 flex items-center gap-1.5">
+              <span class="material-symbols-outlined text-sky-600 text-[20px]">receipt_long</span>
+              Current Bill / Sale
             </h3>
-            <span id="cartCountBadge" class="text-xs bg-secondary text-on-secondary px-2 py-0.5 rounded-full font-bold">0 items</span>
+            <span id="cartCountBadge" class="text-xs bg-sky-100 text-sky-800 border border-sky-200 px-2.5 py-0.5 rounded-full font-bold">0 items</span>
           </div>
 
-          <!-- Customer Dropdown -->
-          <div class="mb-3">
-            <label class="text-[11px] font-semibold text-on-surface-variant uppercase block mb-1">Customer</label>
-            <select id="posCustomerSelect" class="w-full bg-surface-container-low text-body-sm text-on-surface px-2.5 py-1.5 rounded-lg border border-outline-variant/20 outline-none">
-              <option value="Walk-in Customer" data-mobile="9876543210">Walk-in Retail Customer</option>
-              <option value="JEYAPANDI" data-mobile="9500716518">JEYAPANDI (9500716518)</option>
-              <option value="Sathya Agencies" data-mobile="9876543210">Sathya Agencies (9876543210)</option>
-              <option value="Bharat Electronics" data-mobile="6789753456">Bharat Electronics (6789753456)</option>
-              <option value="Mahadev Electricals" data-mobile="9843266565">Mahadev Electricals (9843266565)</option>
-            </select>
+          <!-- Customer Dropdown / Walk-in input -->
+          <div class="mb-3 space-y-1.5">
+            <label class="text-[11px] font-semibold text-slate-600 uppercase block">Customer</label>
+            <div class="grid grid-cols-2 gap-2">
+              <select id="posCustomerSelect" onchange="syncCustomerInfo()" class="w-full bg-slate-50 text-xs text-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-200 outline-none focus:border-sky-500">
+                <option value="Walk-in Retail Customer" data-mobile="9876543210">Walk-in Customer</option>
+                <option value="asdda" data-mobile="2453657689">asdda (2453657689)</option>
+                <option value="JEYAPANDI" data-mobile="9500716518">JEYAPANDI (9500716518)</option>
+                <option value="Sathya Agencies" data-mobile="9876543210">Sathya Agencies (9876543210)</option>
+                <option value="Bharat Electronics" data-mobile="6789753456">Bharat Electronics (6789753456)</option>
+                <option value="Mahadev Electricals" data-mobile="9843266565">Mahadev Electricals (9843266565)</option>
+              </select>
+              <input id="customCustomerName" type="text" placeholder="Or type customer name" class="w-full bg-slate-50 text-xs text-slate-700 px-2.5 py-1.5 rounded-lg border border-slate-200 outline-none focus:border-sky-500" />
+            </div>
           </div>
 
-          <!-- Cart Line Items Container -->
-          <div id="cartItemsList" class="space-y-2 overflow-y-auto max-h-[300px] pr-1">
-            <div id="cartEmptyNotice" class="text-center py-12 text-on-surface-variant text-xs">
-              <span class="material-symbols-outlined text-4xl opacity-30 mb-1">shopping_basket</span>
-              <p>Cart is currently empty.</p>
-              <p class="text-[11px] opacity-75">Click on products on the left to add items.</p>
+          <!-- Cart Line Items Container: Items to be billed! -->
+          <div id="cartItemsList" class="space-y-2 overflow-y-auto max-h-[260px] pr-1">
+            <div id="cartEmptyNotice" class="text-center py-10 text-slate-400 text-xs">
+              <span class="material-symbols-outlined text-4xl opacity-40 mb-1">shopping_basket</span>
+              <p class="font-medium text-slate-600">No items selected to bill.</p>
+              <p class="text-[11px] opacity-75 mt-0.5">Click any product on the left or scan barcode to add to bill.</p>
             </div>
           </div>
         </div>
 
         <!-- Checkout Totals & Action Buttons -->
-        <div class="pt-3 border-t border-surface-container mt-3 space-y-2">
+        <div class="pt-3 border-t border-slate-200 mt-3 space-y-2.5">
           
           <div class="space-y-1 text-xs">
-            <div class="flex justify-between text-on-surface-variant">
+            <div class="flex justify-between text-slate-600">
               <span>Subtotal:</span>
-              <span id="posSubtotal" class="font-mono text-on-surface">₹0.00</span>
+              <span id="posSubtotal" class="font-mono font-semibold text-slate-800">₹0.00</span>
             </div>
-            <div class="flex justify-between text-on-surface-variant">
+            <div class="flex justify-between text-slate-600">
               <span>GST (12%):</span>
-              <span id="posTax" class="font-mono text-on-surface">₹0.00</span>
+              <span id="posTax" class="font-mono font-semibold text-slate-800">₹0.00</span>
             </div>
-            <div class="flex justify-between items-center text-on-surface-variant">
+            <div class="flex justify-between items-center text-slate-600">
               <span>Discount (₹):</span>
-              <input id="posDiscount" type="number" value="0" min="0" oninput="calculateCartTotals()" class="w-20 text-right bg-surface-container px-2 py-0.5 rounded outline-none text-xs font-mono"/>
+              <input id="posDiscount" type="number" value="0" min="0" oninput="calculateCartTotals()" class="w-24 text-right bg-slate-100 border border-slate-200 px-2 py-0.5 rounded outline-none text-xs font-mono font-semibold"/>
             </div>
           </div>
 
           <!-- Net Total Display -->
-          <div class="bg-surface-container-low p-3 rounded-xl flex items-center justify-between">
-            <span class="font-semibold text-sm text-on-surface">Net Total:</span>
-            <span id="posNetTotal" class="font-headline-lg font-mono text-secondary text-xl font-bold">₹0.00</span>
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+            <span class="font-bold text-sm text-slate-800">Net Total to Bill:</span>
+            <span id="posNetTotal" class="font-mono text-sky-600 text-xl font-bold">₹0.00</span>
           </div>
 
           <!-- Payment Mode Selection -->
           <div>
-            <label class="text-[11px] font-semibold text-on-surface-variant uppercase block mb-1">Payment Method</label>
+            <label class="text-[11px] font-semibold text-slate-500 uppercase block mb-1">Payment Mode</label>
             <div class="grid grid-cols-4 gap-1.5 text-xs font-semibold" id="posPayModeGroup">
-              <button onclick="setPayMode('Cash')" class="pay-mode active py-1.5 rounded-lg border text-center bg-secondary text-on-secondary">Cash</button>
-              <button onclick="setPayMode('UPI')" class="pay-mode py-1.5 rounded-lg border text-center bg-surface-container-low text-on-surface hover:bg-surface-container">UPI</button>
-              <button onclick="setPayMode('Card')" class="pay-mode py-1.5 rounded-lg border text-center bg-surface-container-low text-on-surface hover:bg-surface-container">Card</button>
-              <button onclick="setPayMode('Finance')" class="pay-mode py-1.5 rounded-lg border text-center bg-surface-container-low text-on-surface hover:bg-surface-container">Finance</button>
+              <button onclick="setPayMode('Cash')" class="pay-mode active py-1.5 rounded-lg border text-center bg-sky-600 text-white border-sky-600">Cash</button>
+              <button onclick="setPayMode('UPI')" class="pay-mode py-1.5 rounded-lg border border-slate-200 text-center bg-slate-50 text-slate-700 hover:bg-slate-100">UPI</button>
+              <button onclick="setPayMode('Card')" class="pay-mode py-1.5 rounded-lg border border-slate-200 text-center bg-slate-50 text-slate-700 hover:bg-slate-100">Card</button>
+              <button onclick="setPayMode('Finance')" class="pay-mode py-1.5 rounded-lg border border-slate-200 text-center bg-slate-50 text-slate-700 hover:bg-slate-100">Finance</button>
             </div>
           </div>
 
-          <!-- Checkout Button -->
+          <!-- Checkout & Bill Action Button -->
           <button 
             id="btnCompleteSale"
             onclick="completePOSCheckout()" 
-            class="w-full py-3 rounded-xl bg-secondary text-on-secondary font-headline-sm text-sm hover:opacity-95 active:scale-98 transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+            class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs tracking-wide uppercase transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 disabled:pointer-events-none active:scale-98"
             disabled
           >
-            <span class="material-symbols-outlined text-[18px]">check_circle</span>
-            Complete Sale &amp; Print Receipt
+            <span class="material-symbols-outlined text-[18px]">receipt</span>
+            Complete Sale & Print Tax Bill
           </button>
+
         </div>
 
       </div>
@@ -174,37 +194,70 @@
   </main>
 </div>
 
-<!-- Modal: Printable POS Receipt Voucher -->
-<div id="posReceiptModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-  <div class="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-outline-variant/30">
-    <div class="p-space-md bg-surface-container-low border-b border-surface-container flex items-center justify-between">
-      <h3 class="font-headline-sm text-on-surface flex items-center gap-1.5">
-        <span class="material-symbols-outlined text-secondary">receipt</span>
-        Tax Invoice
-      </h3>
-      <button onclick="closeModal('posReceiptModal')" class="p-1 rounded-lg hover:bg-surface-container text-on-surface-variant">
-        <span class="material-symbols-outlined text-[20px]">close</span>
+<!-- Modal: Add Custom Item to Bill -->
+<div id="customItemModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+  <div class="bg-white rounded-2xl max-w-sm w-full p-5 shadow-2xl border border-slate-100">
+    <div class="flex items-center justify-between pb-3 border-b border-slate-200">
+      <h3 class="text-sm font-bold text-slate-800">Add Custom Charge / Item</h3>
+      <button onclick="closeCustomItemModal()" class="w-7 h-7 rounded hover:bg-slate-100 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[16px]">close</span>
       </button>
     </div>
 
-    <div class="p-space-md text-xs font-mono space-y-2" id="posReceiptPrintArea">
+    <form onsubmit="addCustomItemToBill(event)" class="py-3 space-y-3 text-xs">
+      <div>
+        <label class="block font-semibold text-slate-700 mb-1">Item Description / Name *</label>
+        <input type="text" id="customItemName" required class="w-full px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs" placeholder="e.g. Installation & Testing Charge" />
+      </div>
+
+      <div class="grid grid-cols-2 gap-2">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Rate (₹) *</label>
+          <input type="number" id="customItemPrice" required step="0.01" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" placeholder="500.00" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Quantity</label>
+          <input type="number" id="customItemQty" value="1" min="1" class="w-full px-3 py-1.5 border border-slate-200 rounded-lg outline-none focus:border-sky-500 text-xs font-mono" />
+        </div>
+      </div>
+
+      <div class="pt-2 border-t border-slate-200 flex justify-end gap-2">
+        <button type="button" onclick="closeCustomItemModal()" class="px-3 py-1.5 border border-slate-300 hover:bg-slate-50 rounded-lg text-xs font-medium text-slate-700">Cancel</button>
+        <button type="submit" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs">Add to Bill</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal: Printable Tax Invoice Bill Voucher -->
+<div id="posReceiptModal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200">
+    <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="material-symbols-outlined text-emerald-600 text-xl">check_circle</span>
+        <h3 class="text-sm font-bold text-slate-800">Bill Generated Successfully</h3>
+      </div>
+      <button onclick="closeReceiptModal()" class="w-7 h-7 rounded hover:bg-slate-200 text-slate-400 hover:text-slate-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+    </div>
+
+    <!-- Printable Receipt Area -->
+    <div class="p-5 text-xs font-mono space-y-3" id="posReceiptPrintArea">
       <!-- Injected by JS -->
     </div>
 
-    <div class="p-space-md bg-surface-container-low border-t border-surface-container flex justify-between gap-2">
-      <button onclick="window.print()" class="px-3 py-1.5 bg-surface-container text-on-surface rounded-lg text-xs font-semibold flex items-center gap-1">
-        <span class="material-symbols-outlined text-[16px]">print</span> Print
+    <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-between gap-2">
+      <button onclick="window.print()" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-2xs">
+        <span class="material-symbols-outlined text-[16px]">print</span> Print Tax Invoice
       </button>
-      <button onclick="closeModal('posReceiptModal'); clearCart();" class="px-3 py-1.5 bg-secondary text-on-secondary rounded-lg text-xs font-semibold">
-        Next Sale
+      <button onclick="closeReceiptModal(); clearCart();" class="px-4 py-2 bg-[#0284c7] hover:bg-sky-700 text-white rounded-lg text-xs font-semibold shadow-xs">
+        + Next Customer Bill
       </button>
     </div>
   </div>
 </div>
 
-<%- include('partials/modals') %>
-
-<script src="/js/common.js"></script>
 <script>
   let cart = [];
   let currentPayMode = 'Cash';
@@ -214,17 +267,18 @@
     activeCat = cat;
     document.querySelectorAll('.cat-pill').forEach(btn => {
       if (btn.innerText.includes(cat) || (cat === 'All' && btn.innerText === 'All')) {
-        btn.className = 'cat-pill active px-3 py-1.5 rounded-lg bg-secondary text-on-secondary font-semibold transition-all';
+        btn.className = 'cat-pill active px-3 py-1.5 rounded-lg bg-[#0284c7] text-white font-semibold shadow-xs transition-all';
       } else {
-        btn.className = 'cat-pill px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface border hover:bg-surface-container transition-all';
+        btn.className = 'cat-pill px-3 py-1.5 rounded-lg bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 transition-all';
       }
     });
     filterPOSCatalog();
   }
 
   function filterPOSCatalog() {
-    const q = document.getElementById('posItemSearch').value.toLowerCase();
+    const q = document.getElementById('posItemSearch').value.toLowerCase().trim();
     const cards = document.querySelectorAll('.pos-card');
+
     cards.forEach(c => {
       const name = c.getAttribute('data-name');
       const brand = c.getAttribute('data-brand');
@@ -234,15 +288,25 @@
       const matchesQuery = !q || name.includes(q) || brand.includes(q) || code.includes(q);
       const matchesCat = activeCat === 'All' || cat.toLowerCase().includes(activeCat.toLowerCase());
 
-      if (matchesQuery && matchesCat) {
-        c.style.display = 'flex';
-      } else {
-        c.style.display = 'none';
-      }
+      c.style.display = (matchesQuery && matchesCat) ? 'flex' : 'none';
     });
   }
 
+  // Handle Enter in search input to immediately bill the top matching item
+  function handleSearchKey(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const visibleCard = Array.from(document.querySelectorAll('.pos-card')).find(c => c.style.display !== 'none');
+      if (visibleCard) {
+        visibleCard.click();
+        document.getElementById('posItemSearch').value = '';
+        filterPOSCatalog();
+      }
+    }
+  }
+
   function addToCart(code, name, price, available) {
+    price = Number(price) || 0;
     const existing = cart.find(x => x.code === code);
     if (existing) {
       existing.qty += 1;
@@ -250,7 +314,6 @@
       cart.push({ code, name, price, qty: 1 });
     }
     renderCart();
-    showToast(`Added ${name.slice(0, 20)}...`, 'info');
   }
 
   function updateQty(code, delta) {
@@ -277,16 +340,15 @@
     currentPayMode = mode;
     document.querySelectorAll('.pay-mode').forEach(btn => {
       if (btn.innerText === mode) {
-        btn.className = 'pay-mode active py-1.5 rounded-lg border text-center bg-secondary text-on-secondary';
+        btn.className = 'pay-mode active py-1.5 rounded-lg border text-center bg-sky-600 text-white border-sky-600';
       } else {
-        btn.className = 'pay-mode py-1.5 rounded-lg border text-center bg-surface-container-low text-on-surface hover:bg-surface-container';
+        btn.className = 'pay-mode py-1.5 rounded-lg border border-slate-200 text-center bg-slate-50 text-slate-700 hover:bg-slate-100';
       }
     });
   }
 
   function renderCart() {
     const list = document.getElementById('cartItemsList');
-    const empty = document.getElementById('cartEmptyNotice');
     const badge = document.getElementById('cartCountBadge');
     const btn = document.getElementById('btnCompleteSale');
 
@@ -296,10 +358,10 @@
 
     if (cart.length === 0) {
       list.innerHTML = `
-        <div id="cartEmptyNotice" class="text-center py-12 text-on-surface-variant text-xs">
-          <span class="material-symbols-outlined text-4xl opacity-30 mb-1">shopping_basket</span>
-          <p>Cart is currently empty.</p>
-          <p class="text-[11px] opacity-75">Click on products on the left to add items.</p>
+        <div id="cartEmptyNotice" class="text-center py-10 text-slate-400 text-xs">
+          <span class="material-symbols-outlined text-4xl opacity-40 mb-1">shopping_basket</span>
+          <p class="font-medium text-slate-600">No items selected to bill.</p>
+          <p class="text-[11px] opacity-75 mt-0.5">Click any product on the left or scan barcode to add to bill.</p>
         </div>
       `;
       calculateCartTotals();
@@ -307,16 +369,18 @@
     }
 
     list.innerHTML = cart.map(item => `
-      <div class="flex items-center justify-between p-2 rounded-xl bg-surface-container-low border border-surface-container text-xs">
+      <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs">
         <div class="flex-1 pr-2">
-          <p class="font-semibold text-on-surface line-clamp-1">${item.name}</p>
-          <p class="text-on-surface-variant font-mono">₹${Number(item.price).toLocaleString('en-IN')}</p>
+          <p class="font-bold text-slate-800 line-clamp-1">${item.name}</p>
+          <p class="text-slate-500 font-mono text-[11px]">
+            ₹${Number(item.price).toLocaleString('en-IN')} × ${item.qty} = <strong class="text-slate-800">₹${Number(item.price * item.qty).toLocaleString('en-IN')}</strong>
+          </p>
         </div>
         <div class="flex items-center gap-1.5">
-          <button onclick="updateQty('${item.code}', -1)" class="w-6 h-6 rounded bg-surface-container text-on-surface hover:bg-surface-container-high flex items-center justify-center font-bold">-</button>
-          <span class="font-mono font-bold px-1">${item.qty}</span>
-          <button onclick="updateQty('${item.code}', 1)" class="w-6 h-6 rounded bg-surface-container text-on-surface hover:bg-surface-container-high flex items-center justify-center font-bold">+</button>
-          <button onclick="removeFromCart('${item.code}')" class="text-error hover:bg-error-container p-1 rounded ml-1">
+          <button onclick="updateQty('${item.code}', -1)" class="w-6 h-6 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center justify-center font-bold">-</button>
+          <span class="font-mono font-bold px-1 text-slate-800">${item.qty}</span>
+          <button onclick="updateQty('${item.code}', 1)" class="w-6 h-6 rounded bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 flex items-center justify-center font-bold">+</button>
+          <button onclick="removeFromCart('${item.code}')" class="text-red-500 hover:bg-red-50 p-1 rounded ml-1">
             <span class="material-symbols-outlined text-[15px]">close</span>
           </button>
         </div>
@@ -327,7 +391,7 @@
   }
 
   function calculateCartTotals() {
-    const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const subtotal = cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0);
     const tax = Math.round(subtotal * 0.12 * 100) / 100;
     const discount = parseFloat(document.getElementById('posDiscount').value) || 0;
     const net = Math.max(0, subtotal + tax - discount);
@@ -337,12 +401,45 @@
     document.getElementById('posNetTotal').textContent = `₹${net.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
   }
 
+  function syncCustomerInfo() {
+    const custSelect = document.getElementById('posCustomerSelect');
+    const customInput = document.getElementById('customCustomerName');
+    if (custSelect.value !== 'Walk-in Retail Customer') {
+      customInput.value = custSelect.value;
+    } else {
+      customInput.value = '';
+    }
+  }
+
+  function openCustomItemModal() {
+    document.getElementById('customItemModal').classList.remove('hidden');
+  }
+
+  function closeCustomItemModal() {
+    document.getElementById('customItemModal').classList.add('hidden');
+  }
+
+  function addCustomItemToBill(e) {
+    e.preventDefault();
+    const name = document.getElementById('customItemName').value.trim();
+    const price = parseFloat(document.getElementById('customItemPrice').value) || 0;
+    const qty = parseInt(document.getElementById('customItemQty').value) || 1;
+    const code = `CUSTOM-${Date.now().toString().slice(-4)}`;
+
+    cart.push({ code, name, price, qty });
+    renderCart();
+    closeCustomItemModal();
+    document.getElementById('customItemName').value = '';
+    document.getElementById('customItemPrice').value = '';
+  }
+
   async function completePOSCheckout() {
     if (cart.length === 0) return;
     const custSelect = document.getElementById('posCustomerSelect');
-    const custName = custSelect.value;
-    const custMobile = custSelect.options[custSelect.selectedIndex].getAttribute('data-mobile');
-    const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+    const customInput = document.getElementById('customCustomerName');
+    const custName = customInput.value.trim() || custSelect.value;
+    const custMobile = custSelect.options[custSelect.selectedIndex].getAttribute('data-mobile') || '9876543210';
+    const subtotal = cart.reduce((sum, i) => sum + (Number(i.price) * i.qty), 0);
     const tax = Math.round(subtotal * 0.12 * 100) / 100;
     const discount = parseFloat(document.getElementById('posDiscount').value) || 0;
 
@@ -365,50 +462,73 @@
       });
       const data = await res.json();
       if (data.success) {
-        showToast('Sale completed successfully!', 'success');
-        openPOSReceiptVoucher(data.data.order, data.data.receipt);
+        openPOSReceiptVoucher(data.data.order, data.data.receipt, data.data.invoice);
       } else {
-        showToast(data.message || 'Error processing checkout', 'error');
+        alert(data.message || 'Error processing checkout');
       }
     } catch (err) {
-      showToast('Network error during checkout', 'error');
+      console.error(err);
+      alert('Network error during checkout');
     }
   }
 
-  function openPOSReceiptVoucher(order, receipt) {
+  function openPOSReceiptVoucher(order, receipt, invoice) {
     const area = document.getElementById('posReceiptPrintArea');
+    const invNum = invoice ? invoice.invoiceNo : (order ? order.orderNo : 'INV-2026');
+    const subtotal = Number(order.grossTotal || 0);
+    const tax = Number(order.taxAmount || 0);
+    const total = Number(order.docTotal || 0);
+
     area.innerHTML = `
-      <div class="text-center border-b pb-2">
-        <h2 class="font-bold text-base">ENTERPRISE RETAIL POS</h2>
-        <p class="text-[10px]">Store ARC1 • GSTIN: 33AABCB1002G1ZN</p>
-        <p class="text-[10px] mt-1">${receipt.date} • ${receipt.refNo}</p>
+      <div class="text-center border-b border-dashed border-slate-300 pb-3">
+        <h2 class="font-bold text-sm text-slate-900 tracking-tight">ENTERPRISE ERP AND POS</h2>
+        <p class="text-[10px] text-slate-500 font-sans">Retail Store ARC1 • GSTIN: 33AAACB1234F1Z5</p>
+        <div class="mt-1.5 inline-block bg-slate-100 px-2 py-0.5 rounded text-[10px] font-bold text-slate-700">
+          TAX INVOICE BILL: #${invNum}
+        </div>
+        <p class="text-[10px] text-slate-500 mt-1">${receipt.date} • ${receipt.refNo}</p>
       </div>
 
-      <div class="py-2 border-b text-[11px]">
-        <p>Customer: <strong>${order.customerName}</strong></p>
-        <p>Mobile: ${order.mobile}</p>
-        <p>Payment: ${receipt.paymentMethod} (PAID)</p>
+      <div class="py-2.5 border-b border-dashed border-slate-300 text-[11px] space-y-0.5">
+        <p>Customer: <strong class="text-slate-800">${order.customerName}</strong></p>
+        <p>Mobile: <span class="font-mono">${order.mobile}</span></p>
+        <p>Payment: <strong class="text-emerald-700">${receipt.paymentMethod} (PAID)</strong></p>
       </div>
 
-      <div class="py-2 border-b space-y-1">
+      <div class="py-2.5 border-b border-dashed border-slate-300 space-y-1.5">
+        <div class="flex justify-between text-[10px] text-slate-400 font-bold uppercase pb-1 border-b border-slate-100">
+          <span>Item</span>
+          <span>Qty × Rate</span>
+          <span>Amount</span>
+        </div>
         ${order.items.map(i => `
-          <div class="flex justify-between">
-            <span>${i.name.slice(0, 22)} x${i.qty}</span>
-            <span>₹${(i.price * i.qty).toLocaleString('en-IN')}</span>
+          <div class="flex justify-between text-[11px]">
+            <span class="truncate max-w-[160px]">${i.name}</span>
+            <span class="text-slate-500">${i.qty} × ₹${Number(i.price).toLocaleString('en-IN')}</span>
+            <span class="font-bold text-slate-800">₹${Number(i.price * i.qty).toLocaleString('en-IN')}</span>
           </div>
         `).join('')}
       </div>
 
-      <div class="pt-2 text-[11px] space-y-0.5">
-        <div class="flex justify-between"><span>Subtotal:</span> <span>₹${Number(order.grossTotal).toLocaleString('en-IN')}</span></div>
-        <div class="flex justify-between"><span>GST (12%):</span> <span>₹${Number(order.taxAmount).toLocaleString('en-IN')}</span></div>
-        <div class="flex justify-between font-bold text-sm pt-1 border-t"><span>TOTAL:</span> <span>₹${Number(order.docTotal).toLocaleString('en-IN')}</span></div>
+      <div class="pt-2 text-[11px] space-y-1">
+        <div class="flex justify-between text-slate-600"><span>Taxable Subtotal:</span> <span>₹${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between text-slate-600"><span>CGST (6%):</span> <span>₹${(tax / 2).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between text-slate-600"><span>SGST (6%):</span> <span>₹${(tax / 2).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span></div>
+        <div class="flex justify-between font-bold text-sm pt-1.5 border-t border-slate-300 text-slate-900">
+          <span>NET AMOUNT PAID:</span> 
+          <span class="text-sky-600 font-bold">₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+        </div>
       </div>
 
-      <div class="text-center pt-2 text-[10px]">Thank you for shopping with us!</div>
+      <div class="text-center pt-3 text-[10px] text-slate-500 border-t border-dashed border-slate-300 font-sans">
+        Thank you for your purchase! • Enterprise ERP & POS
+      </div>
     `;
-    openModal('posReceiptModal');
+
+    document.getElementById('posReceiptModal').classList.remove('hidden');
+  }
+
+  function closeReceiptModal() {
+    document.getElementById('posReceiptModal').classList.add('hidden');
   }
 </script>
-</body>
-</html>
